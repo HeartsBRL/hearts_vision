@@ -32,12 +32,14 @@ bridge = CvBridge()
 # In relation to a body the standard is: x forward, y left, z up
 # see: http://www.ros.org/reps/rep-0103.html and http://www.ros.org/reps/rep-0105.html
 
-x = 0.0
+x = 0.5
 y = 0.0
 z = 1.0
 
 # To send goals to Point head action server
 class Looker(object):
+
+
     def __init__(self):
         rospy.loginfo("Initializing Looker...")
         self.ac = SimpleActionClient(
@@ -65,9 +67,11 @@ class Looker(object):
 
 
 def image_callback(msg):
+    global saved
     try:
         # Convert ROS Image message to OpenCV2
         img = bridge.imgmsg_to_cv2(msg, "bgr8")
+        saved = img.copy()
     except CvBridgeError, e:
         print(e)
     else:
@@ -95,6 +99,8 @@ def key_callback(msg):
         z = z + 0.01
     elif msg.data=='Z':
         z = z - 0.01
+    elif msg.data=='i':
+        cv2.imwrite('image.png',saved)
     else:
         print(msg.data)
     print(x,y,z)

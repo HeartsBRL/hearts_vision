@@ -1,4 +1,5 @@
 Tiago ROS experiments
+=====================
 
 To run these experiments cd to the hearts_vision/experiment workspace
 
@@ -8,17 +9,17 @@ This is the 'hello world' of ROS, a node that logs "Hello, ROS!".
 Adapted for Python from the example in 'A Gentle Introduction to ROS', O'Kane
 The Python source in in src/steve/nodes
 
-$ roscore
-$ ./hello.sh
+1 roscore
+2 ./hello.sh
 
 pubvel
 ------
 Publishes random directions to the turtlesim on topic 'turtle1/cmd_vel'
 Adapted for Python from the example in 'A Gentle Introduction to ROS', O'Kane
 
-$ roscore
-$ rosrun turtlesim turtlesim_node
-$ ./pubvel.sh
+1 roscore
+2 rosrun turtlesim turtlesim_node
+3 ./pubvel.sh
 
 tiagovel
 --------
@@ -26,8 +27,8 @@ Publishes random directions to tiago on topic '/mobile_base_controller/cmd_vel'
 It uses the Gazebo Tiago simulation with the 'steel' robot (gripper)
 Adapted for Python and Tiago from the example in 'A Gentle Introduction to ROS', O'Kane
 
-$ ./steel.sh
-$ ./tiagovel.sh
+1 ./steel.sh
+2 ./tiagovel.sh
 
 looksee
 -------
@@ -43,9 +44,9 @@ In relation to a body the standard is: x forward, y left, z up.
 See: http://www.ros.org/reps/rep-0103.html and http://www.ros.org/reps/rep-0105.html
 It converts the ROS Image from the (simulated) camera to OpenCV2 and displays this in a window.
 
-$ ./look.sh
-$ ./key.sh
-$ ./looksee.sh
+1 ./look.sh
+2 ./key.sh
+3 ./looksee.sh
 
 lookcanny
 ---------
@@ -53,6 +54,18 @@ This is like looksee above, but uses OpenCV Canny edge-detection
 see: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_canny/py_canny.html#canny
 It converts the ROS Image from the (simulated) camera to OpenCV2, applies greyscale and canny then displays this in a window.
 
-$ ./look.sh
-$ ./key.sh
-$ ./lookcanny.sh
+1 ./look.sh
+2 ./key.sh
+3 ./lookcanny.sh
+
+rm-background
+-------------
+This is a Python script (can be run independently of ROS from the command line or IDLE)
+The script is: src/steve/scripts/rm-background.py
+
+This code takes images saved from the Tiago sim camera (Pringles, biscuits, etc) and removes the background leaving only the object of interest (Pringles) - change the code to change the object.
+It uses the OpenCV MOG2 background subtractor, a threshold function to binarize the image, then bitwise AND of the image and the mask to isolate the object of interest.
+
+1. cd src/steve/scripts
+2. python rm-background.py
+
