@@ -18,6 +18,8 @@ ret, mask = cv.threshold(img,0,255,cv.THRESH_BINARY)
 # Apply mask to foreground image
 res = cv.bitwise_and(fg,fg,mask=mask)
 
+cv.imwrite('../../../images/image.png',res)
+
 cv.imshow('image',res)
 cv.waitKey(0)
 cv.destroyAllWindows()
