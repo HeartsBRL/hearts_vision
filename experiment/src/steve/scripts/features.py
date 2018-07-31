@@ -59,6 +59,7 @@ for i in range(1,len(files)):
 
 
 cv.drawKeypoints(img[0], kp[0], img[0], color=(255,0,0), flags=2)
+cv.imwrite('../../../images/image.png',img[0])
 cv.imshow('image',img[0])
 cv.waitKey(0)
 cv.destroyAllWindows()
