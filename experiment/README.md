@@ -66,8 +66,8 @@ The script is: src/steve/scripts/rm-background.py
 This code takes images saved from the Tiago sim camera (Pringles, biscuits, etc) and removes the background leaving only the object of interest (Pringles) - change the code to change the object.
 It uses the OpenCV MOG2 background subtractor, a threshold function to binarize the image, then bitwise AND of the image and the mask to isolate the object of interest.
 
-1. cd experiment/src/steve/scripts
-2. python rm-background.py
+1. cd experiment
+2. ./rm-background.sh
 
 features.py
 -----------
@@ -77,6 +77,6 @@ This code compares a target image (Pringles sans background) to a number of othe
 
 It outputs the target features as an image then lists the scores for each image.
 
-cd experiment/src/steve/scripts
-python features.py
+cd experiment
+./features.sh
 
