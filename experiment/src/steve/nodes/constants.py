@@ -18,3 +18,4 @@ UP_RIGHT = {'x':1, 'y':-0.5, 'z':1.1}
 DOWN_LEFT = {'x':1, 'y':0.5, 'z':0.1}
 DOWN_RIGHT = {'x':1, 'y':-0.5, 'z':0.1}
 
+LOWE_RATIO = 0.8
