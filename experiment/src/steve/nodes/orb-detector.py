@@ -64,23 +64,32 @@ class Detector:
     def detect(self, image):
         # compute feature descriptors for input image
         des = self.orb.detectAndCompute(image, None)[1]
-        # record best/worst match and object
-        best = 0
-        worst = float("inf")
-        obj = None
-
+        scores = {}
         for objectID in self.data:
             o = self.data[objectID]
             descriptors = o['descriptors']
+            best = 0
             for i in range(len(descriptors)):
                 matches = self.bf.knnMatch(descriptors[i], des, k=2)
                 matches = self.goodMatches(matches)
                 score = len(matches)
                 best = max(best,score)
-                worst = min(worst,score)
-                obj = objectID if score>best else obj
-                dispersion = best/float(worst)
-                rospy.loginfo("{0} score:{1} dispersion:{2}".format(objectID,best,worst))
+
+            # best score for this object
+            scores[objectID] = best
+
+        # find the best and worst object matches
+        best = 0
+        worst = float("inf")
+        obj = None        
+        for objectID in self.data:       
+            obj = objectID if scores[objectID]>best else obj
+            best = max(best,scores[objectID])
+            worst = min(worst,scores[objectID])
+
+        dataRange = float(best-worst)
+        score = round(dataRange/best,2)
+        rospy.loginfo("{0} score:{1}".format(obj,score))
 
 def main(args):
     global bridge

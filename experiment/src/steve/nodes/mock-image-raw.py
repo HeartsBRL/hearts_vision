@@ -28,7 +28,7 @@ def main(args):
 
     # cycle through the images
     i = 0
-    # set rate to 0.1Hz
+    # set rate to 1Hz
     rate = rospy.Rate(1)
     while not rospy.is_shutdown():
         pub.publish(img[i])
