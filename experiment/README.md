@@ -80,3 +80,37 @@ It outputs the target features as an image then lists the scores for each image.
 cd experiment
 ./features.sh
 
+watch.py
+--------
+
+This is a node that subscribes to the imge topic '/xtion/rgb/image_raw' and displays it in a window. We see what the robot sees.
+
+cd experiment
+./look.sh
+
+In a new terminal:
+cd experiment
+./watch.sh
+
+control.py
+----------
+Tiago head controller. It can cycle through a number of head orientations and add a configurable random offset to each.
+
+send start, stop messages to the controller with:
+rostopic pub -1 /vision/control std_msgs/String start
+rostopic pub -1 /vision/control std_msgs/String stop
+
+request gaze e.g. x,y,z = 1,0,1
+rostopic pub -1 /vision/control/request geometry_msgs/Point 1 0 1
+
+kill controller with:
+rosnode kill /control
+
+cd experiment
+./look.sh
+
+cd experiment
+./watch.sh
+
+cd experiment
+./control1.sh
