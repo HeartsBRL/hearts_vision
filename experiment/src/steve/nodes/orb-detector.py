@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+__author__ = "Steve Battle"
+__email__ = "steve.battle@uwe.ac.uk"
+
+# Oriented FAST and Rotated BRIEF (ORB) feature detector
+# Rotation and translation invariant feature descriptors
+# see http://www.willowgarage.com/sites/default/files/orb_final.pdf
+
 import rospy
 from sensor_msgs.msg import Image
 import cv2 as cv
@@ -8,19 +15,21 @@ import json
 import argparse
 import os
 import constants
+from steve.msg import Percept
 
 ap = argparse.ArgumentParser()
 ap.add_argument('json', help="configuration file")
 ap.add_argument('images', help="image directory")
+ap.add_argument('--thresh', type=float, default=0.6, help="image directory")
 args = ap.parse_args()
-
-image = None
 
 def image_callback(msg):
     global bridge
     global image
+    global raw_image
     try:
         # Convert ROS Image message to OpenCV2
+        raw_image = msg
         image = bridge.imgmsg_to_cv2(msg, "bgr8")
     except CvBridgeError, e:
         print(e)
@@ -90,10 +99,11 @@ class Detector:
         dataRange = float(best-worst)
         score = round(dataRange/best,2)
         rospy.loginfo("{0} score:{1}".format(obj,score))
+        return obj, score
 
 def main(args):
     global bridge
-    global image
+    global raw_image
 
     with open(args.json,"r") as file:
         config = json.load(file)
@@ -107,6 +117,10 @@ def main(args):
     imageTopic = "/xtion/rgb/image_raw"
     rospy.Subscriber(imageTopic, Image, image_callback)
 
+    # publish percepts
+    perceptTopic = "/vision/perception"
+    pub = rospy.Publisher(perceptTopic, Percept, queue_size=1)
+
     # change working directory prior to loading images
     os.chdir(args.images)
     d = Detector(config)
@@ -115,7 +129,20 @@ def main(args):
     rate = rospy.Rate(1)
     while not rospy.is_shutdown():
         if not image is None:
-            d.detect(image)
+            img = image
+            raw = raw_image
+            obj, score = d.detect(image)
+            # minimum threshold
+            if score>=args.thresh:
+                # publish the findings on the vision/perception topic
+                p = Percept()
+                p.image = raw
+                p.source = "/xtion/rgb/image_raw"
+                p.object_id = obj
+                p.score = score
+                p.detector = "orb_detector"
+                pub.publish(p)
+
         rate.sleep()
 
 main(args)

@@ -126,14 +126,57 @@ rostopic pub -1 /vision/control/request geometry_msgs/Point 1 0 1
 kill controller with:
 rosnode kill /control
 
-cd experiment
-./look.sh
-
-cd experiment
-./watch.sh
-
-cd experiment
+You can test it with a mock action server substituting for the Tiago:
+roscore
+./mock-action-server.sh
 ./control1.sh
 
+View the output on the vision/control/gaze topic with:
+rostopic echo /vision/control/gaze
 
+You can also manually override the gaze control with a request request, for example:
+rostopic pub -1 /vision/control/request geometry_msgs/Point 1 0 1
+
+To run the controller against the Tiago sim do run the following in separate terminals in the experiment folder:
+./look.sh
+./watch.sh
+./control1.sh
+
+The shell script control1.sh sets up a cyclic scanning pattern, that performs a high left-to-right scan, then a middling right-to-left scan, followed by a low left-to-right scan (with no randomness). These scanning patterns can be configured in the shell script.
+
+
+orb-detector.py
+---------------
+This is a simple feature detector that subscribes to Tiago's image topic "/xtion/rgb/image_raw". 
+It uses the OpenCV Oriented FAST and Rotated BRIEF (ORB) feature detector which provides rotation and translation invariant feature descriptors. See http://www.willowgarage.com/sites/default/files/orb_final.pdf
+
+The output is on the /vision/perception topic. This is a complex type defined in the 'msg' folder of the package with the following elements:
+sensor_msgs/Image image
+string source
+float32 score
+string object_id
+string detector
+geometry_msgs/Point Point
+
+The score is a float in the range [0,1] with 1 being a perfect match. Scores below 0.5 are not published. The object-id is defined in config.json that also defines the raw query images that capture each objevct from a number of different aspects.
+
+The orb-detector can be tested stand-alone by running the following in separate terminals. The mock-image-raw script loads test images from file, mocking the Tiago camera. The percept client consumes the orb-detector output and displays the matched images.
+
+roscore
+./mock-image-raw.sh
+./percept-client.sh
+./orb-detector.sh
+
+You can also run ithe orb-detector directly on the Tiago sim without the mock nodes, and with the vision control node
+
+./look.sh
+./watch.sh
+./control1.h
+./orb-detector.sh
+./percept-client.sh
+
+And start the gaze control with:
+rostopic pub -1 /vision/control std_msgs/String start
+
+Even though it is 'trained' on images of real Pringles tubes, incredibly it recognises the simulated Pringles.
 
