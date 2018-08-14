@@ -80,6 +80,26 @@ It outputs the target features as an image then lists the scores for each image.
 cd experiment
 ./features.sh
 
+The following are real-world tests of MOG2 background removal and ORB feature detection. The query images were taken of a can of pringles against a white sheet (as featureless as can be managed). I used a tripod to keep the camera image stable and switched off auto-focus. The test images are taken against a different background but at approximately the same angle and orientation. The correct image is identified, but with low confidence (a score of 8, compared to 6 for the wine box).
+
+cd experiment
+./rm-background-pringles.sh
+./feature.pringles.sh
+
+photos/cv - 5.jpg 4
+photos/cv - 6.jpg 8
+photos/cv - 7.jpg 4
+photos/cv - 8.jpg 6
+
+Compare this with the test of ORB feature detection against a plain background (white sheet). The feature detector operates much better, identifying features on the pringles tube.
+
+photos/cv - 5.jpg 36
+photos/cv - 6.jpg 47
+photos/cv - 7.jpg 7
+photos/cv - 8.jpg 9
+
+The recommendation from these experiments is to take photos against a featureless background, Autofocus off, using a tripod. There is then no need to use MOG2 background removal.
+
 watch.py
 --------
 
@@ -114,3 +134,6 @@ cd experiment
 
 cd experiment
 ./control1.sh
+
+
+

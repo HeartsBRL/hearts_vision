@@ -28,6 +28,7 @@ for i in range(len(args.bg)):
     print args.bg[i], bg[i].shape[:2]
 
 # Background subtraction
+# see: https://docs.opencv.org/3.1.0/db/d5c/tutorial_py_bg_subtraction.html
 bgs = cv.createBackgroundSubtractorMOG2(varThreshold=args.threshold, detectShadows=True)
 for i in range(len(bg)):
     bgs.apply(bg[i])
