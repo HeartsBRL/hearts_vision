@@ -158,7 +158,7 @@ string object_id
 string detector
 geometry_msgs/Point Point
 
-The score is a float in the range [0,1] with 1 being a perfect match. Scores below 0.5 are not published. The object-id is defined in config.json that also defines the raw query images that capture each objevct from a number of different aspects.
+The score is a float in the range [0,1] with 1 being a perfect match. Scores below a threshold are not published. The object-id is defined in config.json that also defines the raw query images that capture each objevct from a number of different aspects.
 
 The orb-detector can be tested stand-alone by running the following in separate terminals. The mock-image-raw script loads test images from file, mocking the Tiago camera. The percept client consumes the orb-detector output and displays the matched images.
 

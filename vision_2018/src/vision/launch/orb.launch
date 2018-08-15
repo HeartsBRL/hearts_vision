@@ -1,0 +1,30 @@
+<launch>
+    <arg name="ctl-wait" default="--wait 1"/>
+    <arg name="ctl-bounds" default="--bounds 0 0 0"/>
+    <arg name="ctl-coords" default="--coords UP_LEFT UP UP_RIGHT RIGHT AHEAD LEFT DOWN_LEFT DOWN DOWN_RIGHT --end"/>
+    <arg name="orb-conf" default="orb-config.json"/>
+    <arg name="org-path" default="../../../photos"/>
+    <node
+        name="watch"
+        pkg="vision"
+        type="watch.py"
+        output="screen"/>
+    <node
+        name="control"
+        pkg="vision"
+        type="control.py"
+        args="$(arg ctl-wait) $(arg ctl-bounds) $(arg ctl-coords)"
+        output="screen"/>
+    <node
+        name="orb_detector"
+        pkg="vision"
+        type="orb-detector.py"
+        args="$(arg orb-conf) $(arg org-path)"
+        output="screen"
+        cwd="node"/>
+    <node
+        name="percept_client"
+        pkg="vision"
+        type="percept-client.py"
+        output="screen"/>
+</launch>
