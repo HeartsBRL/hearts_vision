@@ -3,4 +3,5 @@ string source
 float32 score
 string object_id
 string detector
-geometry_msgs/Point Point
+geometry_msgs/Point topLeft
+geometry_msgs/Point bottomRight

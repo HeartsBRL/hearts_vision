@@ -1,0 +1,29 @@
+<launch>
+    <arg name="ctl-wait" default="--wait 1"/>
+    <arg name="ctl-bounds" default="--bounds 0 0 0"/>
+    <arg name="ctl-coords" default="--coords UP_HIGH DOWN --end"/>
+    <arg name="hog-thresh" default="--thresh 0.1"/>
+    <node
+        name="watch"
+        pkg="vision"
+        type="watch.py"
+        output="screen"/>
+    <node
+        name="control"
+        pkg="vision"
+        type="control.py"
+        args="$(arg ctl-wait) $(arg ctl-bounds) $(arg ctl-coords)"
+        output="screen"/>
+    <node
+        name="hog_detector"
+        pkg="vision"
+        type="hog-detector.py"
+        args="$(arg hog-thresh)"
+        output="screen"
+        cwd="node"/>
+    <node
+        name="percept_client"
+        pkg="vision"
+        type="percept-client.py"
+        output="screen"/>
+</launch>

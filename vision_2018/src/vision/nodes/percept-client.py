@@ -9,6 +9,7 @@ import rospy
 import cv2 as cv
 from cv_bridge import CvBridge, CvBridgeError
 from vision.msg import Percept
+from geometry_msgs.msg import Point
 
 def percept_callback(msg):
     print msg.source
@@ -17,7 +18,11 @@ def percept_callback(msg):
     print msg.detector
     print
     img = bridge.imgmsg_to_cv2(msg.image, "bgr8")
-    cv.imshow('image', img)
+
+    tl = msg.topLeft
+    br = msg.bottomRight
+    img = cv.rectangle(img,(int(tl.x),int(tl.y)),(int(br.x),int(br.y)),(0,255,0),2)
+    cv.imshow('percept_client', img)
     cv.waitKey(1)
 
 def main():

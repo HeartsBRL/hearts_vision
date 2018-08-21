@@ -1,0 +1,8 @@
+prefix=/home/steve/hearts_vision/vision_2018/install
+
+Name: vision
+Description: Description of vision
+Version: 0.0.0
+Cflags: -I/home/steve/hearts_vision/vision_2018/install/include
+Libs: -L/home/steve/hearts_vision/vision_2018/install/lib 
+Requires: message_runtime

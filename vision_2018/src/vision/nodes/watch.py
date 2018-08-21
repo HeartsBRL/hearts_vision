@@ -27,7 +27,7 @@ def image_callback(msg):
     except CvBridgeError, e:
         print(e)
     else:
-        cv2.imshow('image', img)
+        cv2.imshow('watch', img)
         cv2.waitKey(1)
 
 def main():

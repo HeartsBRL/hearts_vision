@@ -17,7 +17,7 @@ import Queue
 import argparse
 
 ap = argparse.ArgumentParser()
-ap.add_argument('--wait', type=float, default=3)
+ap.add_argument('--wait', type=float, default=1)
 ap.add_argument('--bounds', type=float, nargs=3, default=[0,1,1])
 ap.add_argument('--coords', nargs='+', default=['AHEAD'])
 ap.add_argument('--end', action='store_true', help="terminates coords")
@@ -159,12 +159,13 @@ class GazeControl:
 # The base_link coordinate frame is relative to the mobile robot base: x forward, y left(+ve)/right(-ve), z height
 # see: http://www.ros.org/reps/rep-0103.html and http://www.ros.org/reps/rep-0105.html
  
-    def look(self, x, y, z, block=True):
+    def look(self, x, y, z, block=False):
+        global args
         g = PointHeadGoal()
         g.pointing_frame = 'xtion_optical_frame'
         g.pointing_axis.z = 1.0
         g.max_velocity = 1.0
-        g.min_duration = rospy.Duration(0.5)
+        g.min_duration = rospy.Duration(args.wait)
         g.target.header.frame_id = 'base_link'
         g.target.point.x = x
         g.target.point.y = y
@@ -173,6 +174,7 @@ class GazeControl:
             self.ac.send_goal_and_wait(g)
         else:
             self.ac.send_goal(g)
+        sleep(args.wait)
 
     def publish(self,x,y,z):
         p = Point()

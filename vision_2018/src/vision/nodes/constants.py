@@ -8,6 +8,7 @@
 # look straight ahead in base_link coordinate frame
 AHEAD = {'x':1, 'y':0, 'z':0.6}
 
+UP_HIGH = {'x':1, 'y':0, 'z':1.3}
 UP = {'x':1, 'y':0, 'z':1.1}
 DOWN = {'x':1, 'y':0, 'z':0.1}
 LEFT = {'x':1, 'y':0.5, 'z':0.6}
@@ -19,3 +20,7 @@ DOWN_LEFT = {'x':1, 'y':0.5, 'z':0.1}
 DOWN_RIGHT = {'x':1, 'y':-0.5, 'z':0.1}
 
 LOWE_RATIO = 0.8
+
+# predefined object-ids
+
+PERSON_ID = 'person'
