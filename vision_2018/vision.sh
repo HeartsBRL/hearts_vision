@@ -8,4 +8,4 @@
 # rostopic pub -1 /vision/control/request geometry_msgs/Point 1 0 1
 
 source devel/setup.bash
-roslaunch vision orb.launch
+roslaunch vision vision.launch

@@ -3,7 +3,8 @@
     <arg name="ctl-bounds" default="--bounds 0 0 0"/>
     <arg name="ctl-coords" default="--coords UP_LEFT UP UP_RIGHT RIGHT AHEAD LEFT DOWN_LEFT DOWN DOWN_RIGHT --end"/>
     <arg name="orb-conf" default="orb-config.json"/>
-    <arg name="org-path" default="../../../photos"/>
+    <arg name="orb-path" default="../../../photos"/>
+    <arg name="orb-thresh" default="0.5"/>
     <node
         name="watch"
         pkg="vision"
@@ -19,7 +20,7 @@
         name="orb_detector"
         pkg="vision"
         type="orb-detector.py"
-        args="$(arg orb-conf) $(arg org-path)"
+        args="$(arg orb-conf) $(arg orb-path)  $(arg orb-thresh)"
         output="screen"
         cwd="node"/>
     <node

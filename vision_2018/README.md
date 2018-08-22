@@ -77,7 +77,7 @@ It can be run in the Tiago sim which includes a human profile which achieves som
 ./hog.sh
 
 Turn the Tiago to face the human with:
-./tiagovel.sh
+./rotate.sh
 
 Start/stop an up-down head scanning (using control.py) with
 ./start

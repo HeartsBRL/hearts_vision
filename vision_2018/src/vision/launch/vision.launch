@@ -1,7 +1,10 @@
 <launch>
     <arg name="ctl-wait" default="--wait 1"/>
     <arg name="ctl-bounds" default="--bounds 0 0 0"/>
-    <arg name="ctl-coords" default="--coords LEFT AHEAD RIGHT --end"/>
+    <arg name="ctl-coords" default="--coords UP_LEFT UP UP_RIGHT RIGHT AHEAD LEFT DOWN_LEFT DOWN DOWN_RIGHT --end"/>
+    <arg name="orb-conf" default="orb-config.json"/>
+    <arg name="orb-path" default="../../../photos"/>
+    <arg name="orb-thresh" default="0.5"/>
     <arg name="hog-thresh" default="--thresh 0.6"/>
     <node
         name="watch"
@@ -15,10 +18,10 @@
         args="$(arg ctl-wait) $(arg ctl-bounds) $(arg ctl-coords)"
         output="screen"/>
     <node
-        name="hog_detector"
+        name="orb_detector"
         pkg="vision"
-        type="hog-detector.py"
-        args="$(arg hog-thresh)"
+        type="orb-detector.py"
+        args="$(arg orb-conf) $(arg orb-path)  $(arg orb-thresh)"
         output="screen"
         cwd="node"/>
     <node
@@ -26,4 +29,11 @@
         pkg="vision"
         type="percept-client.py"
         output="screen"/>
+    <node
+        name="hog_detector"
+        pkg="vision"
+        type="hog-detector.py"
+        args="$(arg hog-thresh)"
+        output="screen"
+        cwd="node"/>
 </launch>
