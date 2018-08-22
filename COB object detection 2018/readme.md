@@ -1,7 +1,28 @@
 Link to fork - https://github.com/HeartsBRL/ros_people_object_detection_tensorflow
 
-- Python 2.7.9 in a virtual environment running parallel to system python
-- Tenserflow 1.10 using pip install inside virtual environment
+#For Python 2.7.9
+
+mkdir ~/src
+mkdir ~/.localpython
+cd ~/src
+wget http://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz
+tar -zxvf Python-2.7.9.tgz
+cd Python-2.7.9
+make clean
+./configure --prefix=/home/${USER}/.localpython --enable-unicode=ucs4
+make
+make install
+
+#For VirtualEnv (Globally installed)
+
+sudo apt-get install python-virtualenv
+mkdir ~/virtualenvs
+virtualenv NameOfVirtualEnv --python=/home/${USER}/.localpython/bin/python2.7
+source NameOfVirtualEnv/bin/activate
+pip install --upgrade pip
+pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.10.0-cp27-none-linux_x86_64.whl
+
+#Tenserflow 1.10 using pip install inside virtual environment
 - Pip install empy 
 - Pip install other dependencies 
 
