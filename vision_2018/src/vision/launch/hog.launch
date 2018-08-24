@@ -2,7 +2,7 @@
     <arg name="ctl-wait" default="--wait 1"/>
     <arg name="ctl-bounds" default="--bounds 0 0 0"/>
     <arg name="ctl-coords" default="--coords LEFT AHEAD RIGHT --end"/>
-    <arg name="hog-thresh" default="--thresh 0.6"/>
+    <arg name="hog-thresh" default="--thresh 0"/>
     <node
         name="watch"
         pkg="vision"

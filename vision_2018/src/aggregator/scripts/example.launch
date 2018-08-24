@@ -1,0 +1,13 @@
+<launch>
+
+  <!-- Add another node, i.e pepper: -->
+  <node name="pepper" pkg="brl_pepper" type="pepper.py" respawn="true"/>
+  
+  <!-- Add another node with arguments, i.e below: -->
+  <node name="adafruitpepperfeed" pkg="brl_adafruit" type="adafruit.py" args="firstarg secondarg etc" respawn="true"/>
+
+  <!-- Add another launch file, i.e rosbridge_websocket: -->
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+
+
+</launch>
