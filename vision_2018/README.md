@@ -87,3 +87,23 @@ percept_client.py
 -----------------
 
 The output from both the orb and hog detectors can be viewed with the percept_client.py run from both launchers described above. It produces a window containing an image and a bounding box around the object detected.
+
+gaze.py
+-------
+
+This code directs gaze towards objects recognised with high confidence, steering Tiago's head to
+move them towards the centre of the frame. It also captures and saves the best image
+within a start/stop period marked out by the start/stop events.
+
+Like the percept-client it produces a window containing an image and a bounding box around the object detected, with a line drawn to the centre of the image which acts as the control vector for gaze control.
+
+It subscribes and responds to to perception events on topic "/vision/perception"
+It consumes gaze output from the controller, Points in the base_link coordinate frame, on topic "vision/control/gaze"
+It controls Tiago's gaze by publishing requests, Points in the base_link coordinate frame, on topic "/vision/control/request"
+The window of observation is marked out by start/stop events on "/vision/control"
+The launch file invokes gaze.py with an argument that specifies the image save directory.
+
+The following runs gaze control with the orb object detector
+
+./tiago.sh
+./orb-gaze.sh

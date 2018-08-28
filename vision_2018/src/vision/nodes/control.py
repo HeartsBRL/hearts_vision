@@ -94,18 +94,16 @@ class Gaze(State):
             self.neutral()
             return 'exit'
 
+        x, y, z = None, None, None
         if not self.q.empty():
             p = self.q.get()
-            self.gazeControl.look(p.x,p.y,p.z)
-            self.gazeControl.publish(p.x,p.y,p.z)
-            rospy.loginfo('gaze: {0}, {1}, {2}'.format(p.x,p.y,p.z))
-            sleep(args.wait)
-            return 'stop' if end else 'repeat'         
+            x, y, z = p.x, p.y, p.z
+        else:
+            # look towards coords +/- random offset within bounds
+            x = self.coords['x'] + random.uniform(-self.bounds[0],self.bounds[0])
+            y = self.coords['y'] + random.uniform(-self.bounds[1],self.bounds[1])
+            z = self.coords['z'] + random.uniform(-self.bounds[2],self.bounds[2])
 
-        # look towards coords +/- random offset within bounds
-        x = self.coords['x'] + random.uniform(-self.bounds[0],self.bounds[0])
-        y = self.coords['y'] + random.uniform(-self.bounds[1],self.bounds[1])
-        z = self.coords['z'] + random.uniform(-self.bounds[2],self.bounds[2])
         self.gazeControl.look(x,y,z)
         self.gazeControl.publish(x,y,z)
         rospy.loginfo('gaze: {0}, {1}, {2}'.format(x,y,z))
@@ -126,10 +124,6 @@ class Q(State):
     def __init__(self,queue):
         State.__init__(self, outcomes=['continue','stop','exit'], input_keys=['point_in'])
         self.q = queue
-        self.point = None
-
-    def duplicate(self,p):
-        return self.point is not None and self.point.x==p.x and self.point.y==p.y and self.point.z==p.z
     
     def execute(self, data):
         global end
@@ -137,11 +131,11 @@ class Q(State):
             self.service_preempt()
             return 'exit'
 
-        if 'point_in' in data and not self.duplicate(data.point_in):    
-            # queue requested point
+        if 'point_in' in data and self.q.empty():    
+            # queue requested point (if the queue is empty)
             self.q.put(data.point_in)
             rospy.loginfo(data.point_in)
-            self.point = data.point_in
+
         sleep(1)
         return 'stop' if end else 'continue'
 
@@ -165,7 +159,7 @@ class GazeControl:
         g.pointing_frame = 'xtion_optical_frame'
         g.pointing_axis.z = 1.0
         g.max_velocity = 1.0
-        g.min_duration = rospy.Duration(args.wait)
+        g.min_duration = rospy.Duration(1)
         g.target.header.frame_id = 'base_link'
         g.target.point.x = x
         g.target.point.y = y

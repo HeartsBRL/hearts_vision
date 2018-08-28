@@ -101,14 +101,17 @@ class Detector:
             # keep track of best for this object
             best = 0
             for i in range(len(descriptors)):
-                matches = self.bf.knnMatch(descriptors[i], des, k=2)
-                matches = self.goodMatches(matches)
-                score = len(matches)
-                best = max(best,score)
-                if score>maximum:
-                    index = i
-                    best_match = matches
-                    maximum = score
+                try:
+                    matches = self.bf.knnMatch(descriptors[i], des, k=2)
+                    matches = self.goodMatches(matches)
+                    score = len(matches)
+                    best = max(best,score)
+                    if score>maximum:
+                        index = i
+                        best_match = matches
+                        maximum = score
+                except:
+                    rospy.logerr("KNNMATCH")
 
             # best score for this object
             scores[objectID] = best
@@ -159,7 +162,7 @@ def main(args):
     global bridge
     global raw_image
 
-    print os.getcwd()
+    #print os.getcwd()
 
     with open(args.json,"r") as file:
         config = json.load(file)
