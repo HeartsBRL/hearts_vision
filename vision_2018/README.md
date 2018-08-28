@@ -107,3 +107,11 @@ The following runs gaze control with the orb object detector
 
 ./tiago.sh
 ./orb-gaze.sh
+
+Start with ./start.sh
+Stop with ./stop.sh (then check the photo save directory)
+
+The best way to kill everything is to:
+./stop.sh
+./kill.sh
+Then ctl-c the launch window
