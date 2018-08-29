@@ -66,3 +66,17 @@ rosdep install --from-path src/ -y -i
 catkin_make
 
 pip install face_recognition
+
+# Some extra libraries. Preferably insido de virtual environment
+
+Follow the next bit in https://github.com/cagbal/ros_people_object_detection_tensorflow where you install the models and change the camera name topics from default to Tiago's. Camera = /xtion/rgb/camera_raw
+
+pip install pyyaml
+pip install rospkg
+pip install opencv-python
+sudo apt-get install build-essential
+sudo apt-get install llvm
+pip install llvmpy
+pip install cython
+pip install numba
+
