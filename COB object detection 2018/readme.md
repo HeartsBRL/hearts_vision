@@ -87,3 +87,4 @@ pip install cython
 
 pip install numba
 
+# Use "deactivate" to go out of the virtual environment
