@@ -11,6 +11,7 @@ DETECTOR = 'orb_detector'
 
 import rospy
 from sensor_msgs.msg import Image
+from std_msgs.msg import String
 from geometry_msgs.msg import Point
 import cv2 as cv
 from cv_bridge import CvBridge, CvBridgeError
@@ -19,8 +20,10 @@ import argparse
 import os
 import constants
 import numpy as np
+import matplotlib
 from matplotlib import pyplot as plt
 from vision.msg import Percept
+import copy
 
 ap = argparse.ArgumentParser()
 ap.add_argument('json', help="configuration file")
@@ -31,19 +34,10 @@ ap.add_argument('--thresh', type=float, default=0.6, help="threshold")
 args = ap.parse_known_args()[0]
 
 image = None
-raw_image = None
+latest_image = None
+image_buffer = None
 gaze = None
-
-def image_callback(msg):
-    global bridge
-    global image
-    global raw_image
-    try:
-        # Convert ROS Image message to OpenCV2
-        raw_image = msg
-        image = bridge.imgmsg_to_cv2(msg, "bgr8")
-    except CvBridgeError, e:
-        print(e)
+active = False
 
 class Detector:
     def __init__(self, data):
@@ -139,7 +133,8 @@ class Detector:
         # provide visual feedback
         if obj is not None and score>=args.thresh:
             o = self.data[objectID]
-            im1 = o['img'][index]
+            im1 = cv.cvtColor(o['img'][index], cv.COLOR_BGR2RGB)
+            im2 = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             kp1 = o['keypoints'][index]
 
             for m in best_match:
@@ -151,7 +146,7 @@ class Detector:
                 maxy = int(max(maxy,y))
 
             #img = cv.rectangle(image,(minx,miny),(maxx,maxy),(0,255,0),5)
-            img = cv.drawMatches(im1,kp1,image,key,best_match,None,flags=2)
+            img = cv.drawMatches(im1,kp1,im2,key,best_match,None,flags=2)
             plt.ion()
             plt.imshow(img)
             #plt.show()
@@ -159,16 +154,33 @@ class Detector:
 
         return obj, score, (minx,miny), (maxx,maxy)
 
+def image_callback(msg):
+    global latest_image
+    latest_image = msg
+
 def gaze_callback(msg):
     global gaze
+    global image_buffer
+    global latest_image
     gaze = msg
+    image_buffer = latest_image
+
+def control_callback(msg):
+    global active
+    global fig
+
+    if msg.data == 'stop':
+        active = False
+    elif msg.data == 'start':
+        active = True
 
 def main(args):
     global bridge
-    global raw_image
+    global image_buffer
     global gaze
+    global active
 
-    #print os.getcwd()
+    fig=matplotlib.pyplot.figure(figsize=(10, 5))
 
     with open(args.json,"r") as file:
         config = json.load(file)
@@ -186,9 +198,14 @@ def main(args):
     imageTopic = "/xtion/rgb/image_raw"
     rospy.Subscriber(imageTopic, Image, image_callback)
 
+    # create an control topic subscriber
+    controlTopic = "/vision/control"
+    rospy.Subscriber(controlTopic, String, control_callback)
+
     # publish percepts
     perceptTopic = "/vision/perception"
     pub = rospy.Publisher(perceptTopic, Percept, queue_size=1)
+
 
     # change working directory prior to loading images
     os.chdir(args.images)
@@ -197,15 +214,27 @@ def main(args):
     # set rate to 1Hz
     rate = rospy.Rate(1)
     while not rospy.is_shutdown():
-        if not image is None:
-            raw = raw_image
+        fig.set_visible(active)
+        plt.draw()
+
+        if active and not image_buffer is None:
+            image_raw = copy.copy(image_buffer)
+            try:
+                # Convert ROS Image message to OpenCV2
+                image = bridge.imgmsg_to_cv2(image_raw, "bgr8")
+            except CvBridgeError, e:
+                rospy.logerr(e)
+                image_buffer = None
+                continue
+
+            #original_image = image.copy()
             g = gaze
             obj, score, topLeft, bottomRight = d.detect(image)
             # minimum threshold
             if score>=args.thresh:
                 # publish the findings on the vision/perception topic
                 p = Percept()
-                p.image = raw
+                p.image = image_raw
                 p.source = "/xtion/rgb/image_raw"
                 p.object_id = obj
                 p.score = score
@@ -216,7 +245,8 @@ def main(args):
                 br.x, br.y = bottomRight
                 p.topLeft = tl
                 p.bottomRight = br
-                p.gaze = g
+                if not g is None:
+                    p.gaze = g
                 pub.publish(p)
 
         rate.sleep()

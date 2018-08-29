@@ -4,7 +4,7 @@
     <arg name="ctl-coords" default="--coords UP_LEFT UP UP_RIGHT RIGHT AHEAD LEFT DOWN_LEFT DOWN DOWN_RIGHT --end"/>
     <arg name="orb-conf" default="orb-config.json"/>
     <arg name="orb-path" default="../../../photos"/>
-    <arg name="orb-thresh" default="0"/>
+    <arg name="orb-thresh" default="--thresh 0.5"/>
     <arg name="gaze-dir" default="../../../tiago-saved-photos"/>
     <node
         name="watch"
@@ -29,6 +29,5 @@
         pkg="vision"
         type="gaze.py"
         args="$(arg gaze-dir)"
-        output="screen"
         cwd="node" />
 </launch>

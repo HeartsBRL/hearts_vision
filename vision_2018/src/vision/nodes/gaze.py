@@ -17,6 +17,8 @@ import math
 import os
 import argparse
 
+NODE = 'gaze'
+
 ap = argparse.ArgumentParser()
 ap.add_argument('dir', help="image save directory")
 
@@ -25,12 +27,13 @@ args = ap.parse_known_args()[0]
 
 # weighted score of WEIGHT_MATCH*match + (1-WEIGHT_MATCH)*(1-distance)
 WEIGHT_MATCH = 0.9
-FACTOR = 0.001
+FACTOR = 0.0005
 
 # best match in this time window
 bestScore = 0
 bestID = None
 bestImage = None
+active = False
 
 # most recent reported direction of gaze
 #gaze = None
@@ -46,12 +49,9 @@ def percept_callback(msg):
     global gaze
     global args
 
-    #print msg.source
-    #print msg.object_id
-    #print msg.score
-    #print msg.detector
-    #print
-    #g = gaze
+    if not active:
+        return
+
     img = bridge.imgmsg_to_cv2(msg.image, "bgr8")
 
     # image centre
@@ -69,7 +69,7 @@ def percept_callback(msg):
     img = cv.circle(img, (cx,cy), 5, (0,0,255), -1)
     img = cv.circle(img, (mx,my), 5, (0,255,0), -1)
     img = cv.rectangle(img,(int(tl.x),int(tl.y)),(int(br.x),int(br.y)),(0,255,0),2)
-    cv.imshow('gaze', img)
+    cv.imshow(NODE, img)
 
     # normalize distance to be within interval [0,1] (with 1 corresponding to image diagonal d)
     d = math.sqrt(math.pow(h,2) + math.pow(w,2))
@@ -104,27 +104,31 @@ def control_callback(msg):
     global bestImage
     global fileCount
     global args
+    global active
 
     # save the best image at the end of the observation period (on 'stop' message)
-    if msg.data == 'stop' and bestScore>0:
-        path = args.dir+"/image"+str(fileCount+1)+"-"+bestID+"-"+str(round(bestScore,2))+".jpg"
-        cv.imwrite(path, bestImage)
-        #fileCount += 1
-        bestScore = 0
-        rospy.loginfo("written: "+path)
-    else:
-        fileCount = len(next(os.walk(args.dir))[2])
+    if msg.data == 'stop':
+        active = False
+        # close the window
+        cv.destroyWindow(NODE)
+        cv.waitKey(1)
+        if bestScore>0:
+            path = args.dir+"/image"+str(fileCount+1)+"-"+bestID+"-"+str(round(bestScore,2))+".jpg"
+            cv.imwrite(path, bestImage)
+            bestScore = 0
+            rospy.loginfo("written: "+path)
 
-""" def gaze_callback(msg):
-    global gaze
-    gaze = msg """
+    elif msg.data == 'start':
+        active = True
+        fileCount = len(next(os.walk(args.dir))[2])
+        cv.namedWindow(NODE)
 
 def main():
     global bridge
     global requestPub
     global fileCount
 
-    rospy.init_node('gaze')
+    rospy.init_node(NODE)
     requestPub = rospy.Publisher('vision/control/request', Point, queue_size=1)
     
     # Instantiate CvBridge
@@ -133,9 +137,6 @@ def main():
     # create an control topic subscriber
     controlTopic = "/vision/control"
     rospy.Subscriber(controlTopic, String, control_callback)
-
-    #gazeTopic = "vision/control/gaze"
-    #rospy.Subscriber(gazeTopic, Point, gaze_callback)
 
     # create a percept subscriber
     perceptTopic = "/vision/perception"

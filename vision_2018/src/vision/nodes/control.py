@@ -16,6 +16,8 @@ import random
 import Queue
 import argparse
 
+QMAX = 2
+
 ap = argparse.ArgumentParser()
 ap.add_argument('--wait', type=float, default=1)
 ap.add_argument('--bounds', type=float, nargs=3, default=[0,1,1])
@@ -106,7 +108,6 @@ class Gaze(State):
 
         self.gazeControl.look(x,y,z)
         self.gazeControl.publish(x,y,z)
-        rospy.loginfo('gaze: {0}, {1}, {2}'.format(x,y,z))
         sleep(args.wait)
         return 'stop' if end else 'continue'
 
@@ -131,12 +132,12 @@ class Q(State):
             self.service_preempt()
             return 'exit'
 
-        if 'point_in' in data and self.q.empty():    
+        if 'point_in' in data and self.q.qsize() < QMAX:    
             # queue requested point (if the queue is empty)
-            self.q.put(data.point_in)
-            rospy.loginfo(data.point_in)
+            p = data.point_in
+            rospy.loginfo("QUEUE({0}): {1}, {2}, {3}".format(self.q.qsize(),p.x,p.y,p.z))
+            self.q.put(p)
 
-        sleep(1)
         return 'stop' if end else 'continue'
 
     def request_preempt(self):
@@ -147,7 +148,6 @@ class GazeControl:
         self.ac = SimpleActionClient('/head_controller/point_head_action', PointHeadAction)
         rospy.loginfo('waiting for action server..')
         self.ac.wait_for_server() #rospy.Duration(5.0)
-        rospy.loginfo("Publishing to: /head_controller/point_head_action")
         self.pub = rospy.Publisher('vision/control/gaze', Point, queue_size=1)
 
 # The base_link coordinate frame is relative to the mobile robot base: x forward, y left(+ve)/right(-ve), z height
@@ -168,7 +168,8 @@ class GazeControl:
             self.ac.send_goal_and_wait(g)
         else:
             self.ac.send_goal(g)
-        sleep(args.wait)
+        # wait for the head movement to finish
+        sleep(1)
 
     def publish(self,x,y,z):
         p = Point()
@@ -253,7 +254,4 @@ def main():
 
     sm.execute()
 
-
-#does this work with launch?
-#if __name__ == '__main__':
 main()
