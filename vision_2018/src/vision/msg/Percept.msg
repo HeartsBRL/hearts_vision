@@ -5,3 +5,4 @@ string object_id
 string detector
 geometry_msgs/Point topLeft
 geometry_msgs/Point bottomRight
+geometry_msgs/Point gaze

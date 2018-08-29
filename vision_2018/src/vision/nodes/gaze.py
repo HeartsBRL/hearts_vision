@@ -33,7 +33,7 @@ bestID = None
 bestImage = None
 
 # most recent reported direction of gaze
-gaze = None
+#gaze = None
 requestPub = None
 
 # count number of files in the save directory
@@ -51,7 +51,7 @@ def percept_callback(msg):
     #print msg.score
     #print msg.detector
     #print
-    g = gaze
+    #g = gaze
     img = bridge.imgmsg_to_cv2(msg.image, "bgr8")
 
     # image centre
@@ -87,6 +87,7 @@ def percept_callback(msg):
     # see: http://www.ros.org/reps/rep-0103.html and http://www.ros.org/reps/rep-0105.html
 
     dx, dy = mx - cx, my - cy
+    g = msg.gaze
     if not g is None:
         p = Point()
         p.x = g.x
@@ -113,9 +114,9 @@ def control_callback(msg):
     else:
         fileCount = len(next(os.walk(args.dir))[2])
 
-def gaze_callback(msg):
+""" def gaze_callback(msg):
     global gaze
-    gaze = msg
+    gaze = msg """
 
 def main():
     global bridge
@@ -132,8 +133,8 @@ def main():
     controlTopic = "/vision/control"
     rospy.Subscriber(controlTopic, String, control_callback)
 
-    gazeTopic = "vision/control/gaze"
-    rospy.Subscriber(gazeTopic, Point, gaze_callback)
+    #gazeTopic = "vision/control/gaze"
+    #rospy.Subscriber(gazeTopic, Point, gaze_callback)
 
     # create a percept subscriber
     perceptTopic = "/vision/perception"

@@ -10,7 +10,7 @@ import std_msgs.msg
 import sensor_msgs.msg
 
 class Percept(genpy.Message):
-  _md5sum = "b3bbf5d9019a8486b076503c52a44b69"
+  _md5sum = "9344e4234c8f4273738fa03ee0fe972f"
   _type = "vision/Percept"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """sensor_msgs/Image image
@@ -20,6 +20,7 @@ string object_id
 string detector
 geometry_msgs/Point topLeft
 geometry_msgs/Point bottomRight
+geometry_msgs/Point gaze
 
 ================================================================================
 MSG: sensor_msgs/Image
@@ -76,8 +77,8 @@ float64 x
 float64 y
 float64 z
 """
-  __slots__ = ['image','source','score','object_id','detector','topLeft','bottomRight']
-  _slot_types = ['sensor_msgs/Image','string','float32','string','string','geometry_msgs/Point','geometry_msgs/Point']
+  __slots__ = ['image','source','score','object_id','detector','topLeft','bottomRight','gaze']
+  _slot_types = ['sensor_msgs/Image','string','float32','string','string','geometry_msgs/Point','geometry_msgs/Point','geometry_msgs/Point']
 
   def __init__(self, *args, **kwds):
     """
@@ -87,7 +88,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       image,source,score,object_id,detector,topLeft,bottomRight
+       image,source,score,object_id,detector,topLeft,bottomRight,gaze
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -110,6 +111,8 @@ float64 z
         self.topLeft = geometry_msgs.msg.Point()
       if self.bottomRight is None:
         self.bottomRight = geometry_msgs.msg.Point()
+      if self.gaze is None:
+        self.gaze = geometry_msgs.msg.Point()
     else:
       self.image = sensor_msgs.msg.Image()
       self.source = ''
@@ -118,6 +121,7 @@ float64 z
       self.detector = ''
       self.topLeft = geometry_msgs.msg.Point()
       self.bottomRight = geometry_msgs.msg.Point()
+      self.gaze = geometry_msgs.msg.Point()
 
   def _get_types(self):
     """
@@ -191,7 +195,7 @@ float64 z
       else:
         buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_6d.pack(_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z))
+      buff.write(_struct_9d.pack(_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z, _x.gaze.x, _x.gaze.y, _x.gaze.z))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -207,6 +211,8 @@ float64 z
         self.topLeft = geometry_msgs.msg.Point()
       if self.bottomRight is None:
         self.bottomRight = geometry_msgs.msg.Point()
+      if self.gaze is None:
+        self.gaze = geometry_msgs.msg.Point()
       end = 0
       _x = self
       start = end
@@ -276,8 +282,8 @@ float64 z
         self.detector = str[start:end]
       _x = self
       start = end
-      end += 48
-      (_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z,) = _struct_6d.unpack(str[start:end])
+      end += 72
+      (_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z, _x.gaze.x, _x.gaze.y, _x.gaze.z,) = _struct_9d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -350,7 +356,7 @@ float64 z
       else:
         buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_6d.pack(_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z))
+      buff.write(_struct_9d.pack(_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z, _x.gaze.x, _x.gaze.y, _x.gaze.z))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -367,6 +373,8 @@ float64 z
         self.topLeft = geometry_msgs.msg.Point()
       if self.bottomRight is None:
         self.bottomRight = geometry_msgs.msg.Point()
+      if self.gaze is None:
+        self.gaze = geometry_msgs.msg.Point()
       end = 0
       _x = self
       start = end
@@ -436,8 +444,8 @@ float64 z
         self.detector = str[start:end]
       _x = self
       start = end
-      end += 48
-      (_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z,) = _struct_6d.unpack(str[start:end])
+      end += 72
+      (_x.topLeft.x, _x.topLeft.y, _x.topLeft.z, _x.bottomRight.x, _x.bottomRight.y, _x.bottomRight.z, _x.gaze.x, _x.gaze.y, _x.gaze.z,) = _struct_9d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -445,6 +453,6 @@ float64 z
 _struct_I = genpy.struct_I
 _struct_3I = struct.Struct("<3I")
 _struct_f = struct.Struct("<f")
-_struct_6d = struct.Struct("<6d")
+_struct_9d = struct.Struct("<9d")
 _struct_2I = struct.Struct("<2I")
 _struct_BI = struct.Struct("<BI")

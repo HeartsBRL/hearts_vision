@@ -49,6 +49,9 @@ string object_id
 string detector
 geometry_msgs/Point topLeft
 geometry_msgs/Point bottomRight
+geometry_msgs/Point gaze
+
+It also consumes gaze output from the controller, Points in the base_link coordinate frame, on topic "vision/control/gaze" which are passed straight to the percept output above.
 
 The score is a float in the range [0,1] with 1 being a perfect match. Scores below a threshold are not published. The object-id is defined in config.json that also defines the raw query images that capture each object from a number of different aspects. The output window shows the feature mapping from the stored query images to the input image.
 
@@ -70,6 +73,7 @@ The hog_detector is an OpenCV People detector SVM with HOG (Histograms of Orient
 see: https://www.pyimagesearch.com/2015/11/09/pedestrian-detection-opencv/
 
 It reads images from the "/xtion/rgb/image_raw" image Topic, and outputs perception events on the "/vision/perception" percept topic. This is of type vision.msg/Percept. The output window shows a bounding box around a humanly recognisable feature, or set of features with the best score.
+It also consumes gaze output from the controller, Points in the base_link coordinate frame, on topic "vision/control/gaze" which are passed straight to the percept output.
 
 It can be run in the Tiago sim which includes a human profile which achieves some recognition, but it appears to perform better on real images.
 
@@ -98,8 +102,9 @@ within a start/stop period marked out by the start/stop events.
 Like the percept-client it produces a window containing an image and a bounding box around the object detected, with a line drawn to the centre of the image which acts as the control vector for gaze control.
 
 It subscribes and responds to to perception events on topic "/vision/perception"
-It consumes gaze output from the controller, Points in the base_link coordinate frame, on topic "vision/control/gaze"
+
 It controls Tiago's gaze by publishing requests, Points in the base_link coordinate frame, on topic "/vision/control/request"
+
 The window of observation is marked out by start/stop events on "/vision/control"
 The launch file invokes gaze.py with an argument that specifies the image save directory.
 

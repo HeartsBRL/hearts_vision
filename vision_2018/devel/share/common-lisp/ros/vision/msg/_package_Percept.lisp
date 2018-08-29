@@ -13,4 +13,6 @@
           TOPLEFT
           BOTTOMRIGHT-VAL
           BOTTOMRIGHT
+          GAZE-VAL
+          GAZE
 ))

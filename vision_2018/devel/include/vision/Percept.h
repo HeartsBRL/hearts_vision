@@ -18,6 +18,7 @@
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/Point.h>
 
 namespace vision
 {
@@ -33,7 +34,8 @@ struct Percept_
     , object_id()
     , detector()
     , topLeft()
-    , bottomRight()  {
+    , bottomRight()
+    , gaze()  {
     }
   Percept_(const ContainerAllocator& _alloc)
     : image(_alloc)
@@ -42,7 +44,8 @@ struct Percept_
     , object_id(_alloc)
     , detector(_alloc)
     , topLeft(_alloc)
-    , bottomRight(_alloc)  {
+    , bottomRight(_alloc)
+    , gaze(_alloc)  {
   (void)_alloc;
     }
 
@@ -68,6 +71,9 @@ struct Percept_
 
    typedef  ::geometry_msgs::Point_<ContainerAllocator>  _bottomRight_type;
   _bottomRight_type bottomRight;
+
+   typedef  ::geometry_msgs::Point_<ContainerAllocator>  _gaze_type;
+  _gaze_type gaze;
 
 
 
@@ -146,12 +152,12 @@ struct MD5Sum< ::vision::Percept_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "b3bbf5d9019a8486b076503c52a44b69";
+    return "9344e4234c8f4273738fa03ee0fe972f";
   }
 
   static const char* value(const ::vision::Percept_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xb3bbf5d9019a8486ULL;
-  static const uint64_t static_value2 = 0xb076503c52a44b69ULL;
+  static const uint64_t static_value1 = 0x9344e4234c8f4273ULL;
+  static const uint64_t static_value2 = 0x738fa03ee0fe972fULL;
 };
 
 template<class ContainerAllocator>
@@ -177,6 +183,7 @@ string object_id\n\
 string detector\n\
 geometry_msgs/Point topLeft\n\
 geometry_msgs/Point bottomRight\n\
+geometry_msgs/Point gaze\n\
 \n\
 ================================================================================\n\
 MSG: sensor_msgs/Image\n\
@@ -257,6 +264,7 @@ namespace serialization
       stream.next(m.detector);
       stream.next(m.topLeft);
       stream.next(m.bottomRight);
+      stream.next(m.gaze);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -292,6 +300,9 @@ struct Printer< ::vision::Percept_<ContainerAllocator> >
     s << indent << "bottomRight: ";
     s << std::endl;
     Printer< ::geometry_msgs::Point_<ContainerAllocator> >::stream(s, indent + "  ", v.bottomRight);
+    s << indent << "gaze: ";
+    s << std::endl;
+    Printer< ::geometry_msgs::Point_<ContainerAllocator> >::stream(s, indent + "  ", v.gaze);
   }
 };
 

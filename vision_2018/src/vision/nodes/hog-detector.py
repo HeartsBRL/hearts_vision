@@ -28,6 +28,11 @@ args = ap.parse_known_args()[0]
 
 image = None
 raw_image = None
+gaze = None
+
+def gaze_callback(msg):
+    global gaze
+    gaze = msg
 
 def image_callback(msg):
     global bridge
@@ -91,6 +96,10 @@ def main(args):
     # Instantiate CvBridge between opencv and ROS
     bridge = CvBridge()
 
+    # subscribe to head movements (gaze)
+    gazeTopic = "vision/control/gaze"
+    rospy.Subscriber(gazeTopic, Point, gaze_callback)
+
     # create an image subscriber
     imageTopic = "/xtion/rgb/image_raw"
     rospy.Subscriber(imageTopic, Image, image_callback)
@@ -106,6 +115,7 @@ def main(args):
     while not rospy.is_shutdown():
         if not image is None:
             raw = raw_image
+            g = gaze
             score, tl, br = d.detect(image)
             # minimum threshold
             rospy.loginfo("hog score: "+str(score))
@@ -119,6 +129,7 @@ def main(args):
                 p.detector = DETECTOR
                 p.topLeft = tl
                 p.bottomRight = br
+                p.gaze = g
                 pub.publish(p)
 
         rate.sleep()

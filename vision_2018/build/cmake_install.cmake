@@ -122,6 +122,7 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/steve/hearts_vision/vision_2018/build/gtest/cmake_install.cmake")
+  include("/home/steve/hearts_vision/vision_2018/build/aggregator/cmake_install.cmake")
   include("/home/steve/hearts_vision/vision_2018/build/vision/cmake_install.cmake")
 
 endif()

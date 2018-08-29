@@ -1,2 +1,2 @@
-vision
+aggregator:vision
 -DCATKIN_DEVEL_PREFIX=/home/steve/hearts_vision/vision_2018/devel -DCMAKE_INSTALL_PREFIX=/home/steve/hearts_vision/vision_2018/install -G Unix Makefiles
