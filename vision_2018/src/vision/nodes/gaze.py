@@ -86,6 +86,7 @@ def percept_callback(msg):
     # The base_link coordinate frame is relative to the mobile robot base: x forward, y left(+ve)/right(-ve), z height
     # see: http://www.ros.org/reps/rep-0103.html and http://www.ros.org/reps/rep-0105.html
 
+    # publish gaze direction request
     dx, dy = mx - cx, my - cy
     g = msg.gaze
     if not g is None:

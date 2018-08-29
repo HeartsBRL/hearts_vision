@@ -1,5 +1,5 @@
 <launch>
-    <arg name="ctl-wait" default="--wait 2"/>
+    <arg name="ctl-wait" default="--wait 3"/>
     <arg name="ctl-bounds" default="--bounds 0 0 0"/>
     <arg name="ctl-coords" default="--coords UP_LEFT UP UP_RIGHT RIGHT AHEAD LEFT DOWN_LEFT DOWN DOWN_RIGHT --end"/>
     <arg name="orb-conf" default="orb-config.json"/>

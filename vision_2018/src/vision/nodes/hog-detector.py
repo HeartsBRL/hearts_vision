@@ -129,7 +129,8 @@ def main(args):
                 p.detector = DETECTOR
                 p.topLeft = tl
                 p.bottomRight = br
-                p.gaze = g
+                if not g is None:
+                    p.gaze = g
                 pub.publish(p)
 
         rate.sleep()
