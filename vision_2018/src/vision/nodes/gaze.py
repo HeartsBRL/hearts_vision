@@ -108,10 +108,11 @@ def control_callback(msg):
 
     # save the best image at the end of the observation period (on 'stop' message)
     if msg.data == 'stop':
+        if active:
+            # close the window
+            cv.destroyWindow(NODE)
+            cv.waitKey(1)
         active = False
-        # close the window
-        cv.destroyWindow(NODE)
-        cv.waitKey(1)
         if bestScore>0:
             path = args.dir+"/image"+str(fileCount+1)+"-"+bestID+"-"+str(round(bestScore,2))+".jpg"
             cv.imwrite(path, bestImage)

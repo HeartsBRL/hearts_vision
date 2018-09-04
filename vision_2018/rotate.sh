@@ -5,5 +5,5 @@
 # run before:
 # ./steel.sh
 source devel/setup.bash
-rosrun steve tiagovel.py
+rosrun vision tiagovel.py
 

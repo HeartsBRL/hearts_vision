@@ -38,6 +38,7 @@ latest_image = None
 image_buffer = None
 gaze = None
 active = False
+fig = None
 
 class Detector:
     def __init__(self, data):
@@ -149,7 +150,7 @@ class Detector:
             img = cv.drawMatches(im1,kp1,im2,key,best_match,None,flags=2)
             plt.ion()
             plt.imshow(img)
-            #plt.show()
+            plt.show()
             plt.pause(0.001)
 
         return obj, score, (minx,miny), (maxx,maxy)
@@ -169,7 +170,7 @@ def control_callback(msg):
     global active
     global fig
 
-    if msg.data == 'stop':
+    if msg.data == 'stop':            
         active = False
     elif msg.data == 'start':
         active = True
@@ -179,8 +180,7 @@ def main(args):
     global image_buffer
     global gaze
     global active
-
-    fig=matplotlib.pyplot.figure(figsize=(10, 5))
+    global fig
 
     with open(args.json,"r") as file:
         config = json.load(file)
@@ -214,10 +214,18 @@ def main(args):
     # set rate to 1Hz
     rate = rospy.Rate(1)
     while not rospy.is_shutdown():
-        fig.set_visible(active)
-        plt.draw()
+
+        #fig.set_visible(active)
+        #plt.draw()
+
+        if not active and not(fig is None):
+            matplotlib.pyplot.close(fig)
+            fig = None
 
         if active and not image_buffer is None:
+            if fig is None:
+                fig=matplotlib.pyplot.figure(figsize=(10, 5))
+
             image_raw = copy.copy(image_buffer)
             try:
                 # Convert ROS Image message to OpenCV2
@@ -227,7 +235,6 @@ def main(args):
                 image_buffer = None
                 continue
 
-            #original_image = image.copy()
             g = gaze
             obj, score, topLeft, bottomRight = d.detect(image)
             # minimum threshold
