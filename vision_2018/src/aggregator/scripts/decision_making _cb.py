@@ -16,7 +16,8 @@ import time
 from std_msgs.msg import String
 from std_msgs.msg import Int32
 from aggregator.msg import DetectedInfo# My personal messages
-from vision.msg import Percept
+from cob_perception_msgs.msg import DetectionArray #Cagbal messages
+#from vision.msg import Percept
 
 class aggregator():
 
@@ -31,8 +32,8 @@ class aggregator():
 
         # Listens to the objection and people detection modules
         self.subDetec = rospy.Subscriber(
-                "/vision/perception",
-                Percept,
+                "/object_detection/detections",
+                DetectionArray,
                 self.callback)
 
     #Default info display
@@ -73,7 +74,7 @@ class aggregator():
     def callback(self, data):
 
         # Print the string stored in the ROS String msg:
-        #rospy.loginfo("I heard: " + data.object_id + "AND" + str(data.score))
+        #rospy.loginfo("I heard: " + data.id + "AND" + str(data.score))
 
         if data.score > self.ScoreThres: #First filter BASED ON SCORE
             
@@ -84,11 +85,11 @@ class aggregator():
             
             if PotObj:
                 self.DInfo.score = data.score
-                self.DInfo.label = data.object_id
+                self.DInfo.label = data.id
                 self.DInfo.decision = "Object Detected"
             if PotPerson:
                 self.DInfo.score = data.score
-                self.DInfo.label = data.object_id
+                self.DInfo.label = data.id
                 self.DInfo.decision = "Person Detected"
 
             if PotPerson and PotObj:
@@ -102,18 +103,18 @@ class aggregator():
             PotPersonLoss = (rospy.Time.now()-self.DetecTimeP) > self.PersonFreqLoss
             if PotObjLoss and self.DInfo.decision == "Object Detected":
                 self.DInfo.score = data.score
-                self.DInfo.label = data.object_id
+                self.DInfo.label = data.id
                 self.DInfo.decision = "Object Lost"
             if PotPersonLoss and self.DInfo.decision == "Person Detected":
                 self.DInfo.score = data.score
-                self.DInfo.label = data.object_id
+                self.DInfo.label = data.id
                 self.DInfo.decision = "Person Lost"
             if PotPersonLoss and PotObjLoss and self.DInfo.decision == "Both detected":
                 self.DInfo.score = data.score
                 self.DInfo.label = "object + person"
                 self.DInfo.decision = "Both lost"
                 # Reset time counters
-            if data.object_id == "person":
+            if data.id == "person":
                 self.DetecTimeP=rospy.Time.now()
                 self.DetecTimeL=rospy.Time.now() 
             else:
