@@ -13,12 +13,14 @@ WIDTH = 400
 import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Point
+from std_msgs.msg import String
 import cv2 as cv
 from cv_bridge import CvBridge, CvBridgeError
 import argparse
 import numpy as np
 import constants
 from vision.msg import Percept
+import copy
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--thresh', type=float, default=0.5, help="threshold")
@@ -27,18 +29,33 @@ ap.add_argument('--thresh', type=float, default=0.5, help="threshold")
 args = ap.parse_known_args()[0]
 
 image = None
-raw_image = None
+latest_image = None
+image_buffer = None
+gaze = None
+active = False
+
+def gaze_callback(msg):
+    global gaze
+    global image_buffer
+    global latest_image
+    gaze = msg
+    image_buffer = latest_image
 
 def image_callback(msg):
-    global bridge
-    global image
-    global raw_image
-    try:
-        # Convert ROS Image message to OpenCV2
-        raw_image = msg
-        image = bridge.imgmsg_to_cv2(msg, "bgr8")
-    except CvBridgeError, e:
-        print(e)
+    global latest_image
+    latest_image = msg
+
+def control_callback(msg):
+    global active
+    if msg.data == 'stop':
+        if active:
+            # close the window
+            cv.destroyWindow(DETECTOR)
+            cv.waitKey(1)
+        active = False
+
+    elif msg.data == 'start':
+        active = True
 
 class Detector:
     def __init__(self):        
@@ -84,16 +101,26 @@ class Detector:
 
 def main(args):
     global bridge
-    global raw_image
+    global image_buffer
+    global gaze
+    global active
 
     rospy.init_node(DETECTOR)
 
     # Instantiate CvBridge between opencv and ROS
     bridge = CvBridge()
 
+    # subscribe to head movements (gaze)
+    gazeTopic = "vision/control/gaze"
+    rospy.Subscriber(gazeTopic, Point, gaze_callback)
+
     # create an image subscriber
     imageTopic = "/xtion/rgb/image_raw"
     rospy.Subscriber(imageTopic, Image, image_callback)
+
+    # create an control topic subscriber
+    controlTopic = "/vision/control"
+    rospy.Subscriber(controlTopic, String, control_callback)
 
     # publish percepts
     perceptTopic = "/vision/perception"
@@ -104,21 +131,32 @@ def main(args):
     # set rate to 1Hz
     rate = rospy.Rate(1)
     while not rospy.is_shutdown():
-        if not image is None:
-            raw = raw_image
+        if active and not image_buffer is None:
+            image_raw = copy.copy(image_buffer)
+            try:
+                # Convert ROS Image message to OpenCV2
+                image = bridge.imgmsg_to_cv2(image_raw, "bgr8")
+            except CvBridgeError, e:
+                rospy.logerr(e)
+                image_buffer = None
+                continue
+
+            g = gaze
             score, tl, br = d.detect(image)
             # minimum threshold
             rospy.loginfo("hog score: "+str(score))
             if score>=args.thresh:
                 # publish the findings on the vision/perception topic
                 p = Percept()
-                p.image = raw
+                p.image = image_raw
                 p.source = "/xtion/rgb/image_raw"
                 p.object_id = constants.PERSON_ID
                 p.score = score
                 p.detector = DETECTOR
                 p.topLeft = tl
                 p.bottomRight = br
+                if not g is None:
+                    p.gaze = g
                 pub.publish(p)
 
         rate.sleep()

@@ -16,6 +16,8 @@ import random
 import Queue
 import argparse
 
+QMAX = 2
+
 ap = argparse.ArgumentParser()
 ap.add_argument('--wait', type=float, default=1)
 ap.add_argument('--bounds', type=float, nargs=3, default=[0,1,1])
@@ -94,21 +96,18 @@ class Gaze(State):
             self.neutral()
             return 'exit'
 
+        x, y, z = None, None, None
         if not self.q.empty():
             p = self.q.get()
-            self.gazeControl.look(p.x,p.y,p.z)
-            self.gazeControl.publish(p.x,p.y,p.z)
-            rospy.loginfo('gaze: {0}, {1}, {2}'.format(p.x,p.y,p.z))
-            sleep(args.wait)
-            return 'stop' if end else 'repeat'         
+            x, y, z = p.x, p.y, p.z
+        else:
+            # look towards coords +/- random offset within bounds
+            x = self.coords['x'] + random.uniform(-self.bounds[0],self.bounds[0])
+            y = self.coords['y'] + random.uniform(-self.bounds[1],self.bounds[1])
+            z = self.coords['z'] + random.uniform(-self.bounds[2],self.bounds[2])
 
-        # look towards coords +/- random offset within bounds
-        x = self.coords['x'] + random.uniform(-self.bounds[0],self.bounds[0])
-        y = self.coords['y'] + random.uniform(-self.bounds[1],self.bounds[1])
-        z = self.coords['z'] + random.uniform(-self.bounds[2],self.bounds[2])
         self.gazeControl.look(x,y,z)
         self.gazeControl.publish(x,y,z)
-        rospy.loginfo('gaze: {0}, {1}, {2}'.format(x,y,z))
         sleep(args.wait)
         return 'stop' if end else 'continue'
 
@@ -126,10 +125,6 @@ class Q(State):
     def __init__(self,queue):
         State.__init__(self, outcomes=['continue','stop','exit'], input_keys=['point_in'])
         self.q = queue
-        self.point = None
-
-    def duplicate(self,p):
-        return self.point is not None and self.point.x==p.x and self.point.y==p.y and self.point.z==p.z
     
     def execute(self, data):
         global end
@@ -137,12 +132,12 @@ class Q(State):
             self.service_preempt()
             return 'exit'
 
-        if 'point_in' in data and not self.duplicate(data.point_in):    
-            # queue requested point
-            self.q.put(data.point_in)
-            rospy.loginfo(data.point_in)
-            self.point = data.point_in
-        sleep(1)
+        if 'point_in' in data and self.q.qsize() < QMAX:    
+            # queue requested point (if the queue is empty)
+            p = data.point_in
+            rospy.loginfo("QUEUE({0}): {1}, {2}, {3}".format(self.q.qsize(),p.x,p.y,p.z))
+            self.q.put(p)
+
         return 'stop' if end else 'continue'
 
     def request_preempt(self):
@@ -153,7 +148,6 @@ class GazeControl:
         self.ac = SimpleActionClient('/head_controller/point_head_action', PointHeadAction)
         rospy.loginfo('waiting for action server..')
         self.ac.wait_for_server() #rospy.Duration(5.0)
-        rospy.loginfo("Publishing to: /head_controller/point_head_action")
         self.pub = rospy.Publisher('vision/control/gaze', Point, queue_size=1)
 
 # The base_link coordinate frame is relative to the mobile robot base: x forward, y left(+ve)/right(-ve), z height
@@ -165,7 +159,7 @@ class GazeControl:
         g.pointing_frame = 'xtion_optical_frame'
         g.pointing_axis.z = 1.0
         g.max_velocity = 1.0
-        g.min_duration = rospy.Duration(args.wait)
+        g.min_duration = rospy.Duration(1)
         g.target.header.frame_id = 'base_link'
         g.target.point.x = x
         g.target.point.y = y
@@ -174,7 +168,8 @@ class GazeControl:
             self.ac.send_goal_and_wait(g)
         else:
             self.ac.send_goal(g)
-        sleep(args.wait)
+        # wait for the head movement to finish
+        sleep(1)
 
     def publish(self,x,y,z):
         p = Point()
@@ -259,7 +254,4 @@ def main():
 
     sm.execute()
 
-
-#does this work with launch?
-#if __name__ == '__main__':
 main()
