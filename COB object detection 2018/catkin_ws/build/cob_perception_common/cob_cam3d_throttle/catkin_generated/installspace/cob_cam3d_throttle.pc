@@ -1,8 +1,0 @@
-prefix=/home/prankit/Documents/hearts_vision/COB object detection 2018/catkin_ws/install
-
-Name: cob_cam3d_throttle
-Description: Description of cob_cam3d_throttle
-Version: 0.6.11
-Cflags: 
-Libs: -L/home/prankit/Documents/hearts_vision/COB object detection 2018/catkin_ws/install/lib -lcam3d_throttle
-Requires: message_filters nodelet pluginlib roscpp sensor_msgs
