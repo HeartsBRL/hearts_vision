@@ -15,12 +15,14 @@ from vision.msg import Percept
 from geometry_msgs.msg import Point
 import math
 import os
+import time
 import argparse
 
 NODE = 'gaze'
 
 ap = argparse.ArgumentParser()
 ap.add_argument('dir', help="image save directory")
+ap.add_argument('--boredom', type=float, default=0.9, help="boredom threshold")
 
 # this is required to ignore additional args added by roslaunch
 args = ap.parse_known_args()[0]
@@ -28,6 +30,7 @@ args = ap.parse_known_args()[0]
 # weighted score of WEIGHT_MATCH*match + (1-WEIGHT_MATCH)*(1-distance)
 WEIGHT_MATCH = 0.9
 FACTOR = 0.0005
+TAU = 10
 
 # best match in this time window
 bestScore = 0
@@ -42,12 +45,18 @@ requestPub = None
 # count number of files in the save directory
 fileCount = -1
 
+# exponential moving average
+last_time = time.time()
+ema = 0
+
 def percept_callback(msg):
     global bestScore
     global bestID
     global bestImage
     global gaze
     global args
+    global last_time
+    global ema
 
     if not active:
         return
@@ -81,7 +90,17 @@ def percept_callback(msg):
         bestScore = score
         bestID = msg.object_id
         bestImage = bridge.imgmsg_to_cv2(msg.image, "bgr8")
-        
+    
+    # exponential moving average used to calculate boredom
+    # see: https://pdfs.semanticscholar.org/882e/93570eae184ae737bf0344cb50a2925e353d.pdf
+    # Algorithms for Unevenly Spaced Time Series: Moving Averages and Other Rolling Operators
+    t = time.time()
+    w = math.exp(-(t-last_time)/TAU)
+    ema = ema*w + score*(1-w)
+    last_time = t
+    rospy.loginfo("EMA: "+str(ema))
+    rospy.loginfo("BOREDOM: "+str(ema/score))
+
     # turn towards the object
     # The base_link coordinate frame is relative to the mobile robot base: x forward, y left(+ve)/right(-ve), z height
     # see: http://www.ros.org/reps/rep-0103.html and http://www.ros.org/reps/rep-0105.html
@@ -89,7 +108,7 @@ def percept_callback(msg):
     # publish gaze direction request
     dx, dy = mx - cx, my - cy
     g = msg.gaze
-    if not g is None:
+    if (ema/score < args.boredom) and not g is None:
         p = Point()
         p.x = g.x
         p.y = g.y - dx*FACTOR

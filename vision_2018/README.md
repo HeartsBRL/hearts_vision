@@ -120,3 +120,18 @@ The best way to kill everything is to:
 ./stop.sh
 ./kill.sh
 Then ctl-c the launch window
+
+cob-adapter
+-----------
+
+Adapts the 'cob' Tensorflow object detection output onto the vision/percept topic for consumption by gaze.py which now incorporates 'boredom' to prevent fixation on a single object.
+
+To run this in the Tiago simulator:
+
+./tiago_sim.sh
+./cob.sh
+./cob-gaze.sh
+
+Then use ./start.sh and ./stop.sh and finally ./kill.sh to control
+
+

@@ -9,3 +9,4 @@ rosnode kill /orb_detector
 rosnode kill /hog_detector
 rosnode kill /gaze
 rosnode kill /watch
+rosnode kill /cob_adapter

@@ -7,5 +7,6 @@
 # request gaze e.g. x,y,z = 1,0,1
 # rostopic pub -1 /vision/control/request geometry_msgs/Point 1 0 1
 
+source ~/pyv/bin/activate
 source devel/setup.bash
-roslaunch vision orb-gaze.launch
+roslaunch cob_people_object_detection_tensorflow alltogether.launch

@@ -28,7 +28,7 @@ import copy
 ap = argparse.ArgumentParser()
 ap.add_argument('json', help="configuration file")
 ap.add_argument('images', help="image directory")
-ap.add_argument('--thresh', type=float, default=0.6, help="threshold")
+ap.add_argument('--thresh', type=float, default=0.0, help="threshold")
 
 # this is required to ignore additional args added by roslaunch
 args = ap.parse_known_args()[0]
