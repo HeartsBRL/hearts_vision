@@ -3,8 +3,9 @@
     <arg name="ctl-bounds" default="--bounds 0 0 0"/>
     <arg name="ctl-coords" default="--coords UP_LEFT UP UP_RIGHT RIGHT AHEAD LEFT DOWN_LEFT DOWN DOWN_RIGHT --end"/>
     <arg name="cob-thresh" default="--thresh 0.0"/>
+    <arg name="cob-obj" default="--objects ../../../objects1.txt"/>
     <arg name="gaze-dir" default="../../../tiago-saved-photos"/>
-    <arg name="gaze-boredom" default="--boredom 0.9"/>
+    <arg name="gaze-boredom" default="--boredom 0.5"/>
     <node
         name="watch"
         pkg="vision"
@@ -20,7 +21,8 @@
         name="cob_adapter"
         pkg="vision"
         type="cob-adapter.py"
-        args="$(arg cob-thresh)"
+        args="$(arg cob-thresh) $(arg cob-obj)"
+        cwd="node"
         output="screen"/>
     <node
         name="gaze"

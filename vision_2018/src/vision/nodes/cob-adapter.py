@@ -16,7 +16,8 @@ import argparse
 NODE = 'cob_adapter'
 
 ap = argparse.ArgumentParser()
-ap.add_argument('--thresh', type=float, default=0.0, help="threshold")
+ap.add_argument('--thresh', type=float, default=0, help="threshold")
+ap.add_argument('--objects', help="targeted objects")
 
 # this is required to ignore additional args added by roslaunch
 args = ap.parse_known_args()[0]
@@ -25,25 +26,33 @@ args = ap.parse_known_args()[0]
 gaze = None
 pub = None
 latest_image = None
+objects = set()
 
 def detection_callback(msg):
     global args
     global latest_image
     global pub
     global gaze
+    global objects
 
     d = msg.detections
     if len(d)==0:
         return
 
-    best = 0
-    for i in range(1,len(d)):
-        if d[i].score>d[best].score:
+    # find best score, filtering out unwanted objects
+    best = -1
+    score = -1
+    for i in range(len(d)):
+        if (d[i].score>score) \
+        and not(len(objects)>0 and not(d[i].label in objects)):
             best = i
+            score = d[i].score
     
+    if best<0:
+        return
+
     g = gaze
-    score = d[best].score
-    rospy.loginfo("cob score: "+str(score))
+    rospy.loginfo("cob: "+d[best].label+" "+str(score))
 
     # minimum threshold
     if score>=args.thresh:
@@ -75,8 +84,18 @@ def gaze_callback(msg):
 
 def main():
     global pub
+    global objects
 
     rospy.init_node(NODE)
+
+    if args.objects is not None:
+        f = open(args.objects, "r")
+        line = f.readline().rstrip()
+        while line:
+            objects.add(line)
+            rospy.loginfo(line)
+            line = f.readline().rstrip()
+        f.close()
 
     # subscribe to cob detections
     cobTopic = '/object_detection/detections'

@@ -15,14 +15,13 @@ from vision.msg import Percept
 from geometry_msgs.msg import Point
 import math
 import os
-import time
 import argparse
 
 NODE = 'gaze'
 
 ap = argparse.ArgumentParser()
 ap.add_argument('dir', help="image save directory")
-ap.add_argument('--boredom', type=float, default=0.9, help="boredom threshold")
+ap.add_argument('--boredom', type=float, default=0.75, help="boredom threshold")
 
 # this is required to ignore additional args added by roslaunch
 args = ap.parse_known_args()[0]
@@ -30,13 +29,14 @@ args = ap.parse_known_args()[0]
 # weighted score of WEIGHT_MATCH*match + (1-WEIGHT_MATCH)*(1-distance)
 WEIGHT_MATCH = 0.9
 FACTOR = 0.0005
-TAU = 10
+PERIODS = 10
 
 # best match in this time window
 bestScore = 0
 bestID = None
 bestImage = None
 active = False
+weight = 2/(PERIODS+1.0)
 
 # most recent reported direction of gaze
 #gaze = None
@@ -46,8 +46,9 @@ requestPub = None
 fileCount = -1
 
 # exponential moving average
-last_time = time.time()
 ema = 0
+activation = 0
+previous = 0
 
 def percept_callback(msg):
     global bestScore
@@ -57,6 +58,7 @@ def percept_callback(msg):
     global args
     global last_time
     global ema
+    global activation
 
     if not active:
         return
@@ -78,7 +80,6 @@ def percept_callback(msg):
     img = cv.circle(img, (cx,cy), 5, (0,0,255), -1)
     img = cv.circle(img, (mx,my), 5, (0,255,0), -1)
     img = cv.rectangle(img,(int(tl.x),int(tl.y)),(int(br.x),int(br.y)),(0,255,0),2)
-    cv.imshow(NODE, img)
 
     # normalize distance to be within interval [0,1] (with 1 corresponding to image diagonal d)
     d = math.sqrt(math.pow(h,2) + math.pow(w,2))
@@ -91,15 +92,7 @@ def percept_callback(msg):
         bestID = msg.object_id
         bestImage = bridge.imgmsg_to_cv2(msg.image, "bgr8")
     
-    # exponential moving average used to calculate boredom
-    # see: https://pdfs.semanticscholar.org/882e/93570eae184ae737bf0344cb50a2925e353d.pdf
-    # Algorithms for Unevenly Spaced Time Series: Moving Averages and Other Rolling Operators
-    t = time.time()
-    w = math.exp(-(t-last_time)/TAU)
-    ema = ema*w + score*(1-w)
-    last_time = t
-    rospy.loginfo("EMA: "+str(ema))
-    rospy.loginfo("BOREDOM: "+str(ema/score))
+    activation = max(activation,score)
 
     # turn towards the object
     # The base_link coordinate frame is relative to the mobile robot base: x forward, y left(+ve)/right(-ve), z height
@@ -108,13 +101,15 @@ def percept_callback(msg):
     # publish gaze direction request
     dx, dy = mx - cx, my - cy
     g = msg.gaze
+    rospy.loginfo("BOREDOM: "+str(ema/score))
+    p = Point()
     if (ema/score < args.boredom) and not g is None:
-        p = Point()
         p.x = g.x
         p.y = g.y - dx*FACTOR
         p.z = g.z - dy*FACTOR
-        requestPub.publish(p)
 
+    requestPub.publish(p)
+    cv.imshow(NODE, img)
     cv.waitKey(1)
 
 def control_callback(msg):
@@ -124,6 +119,8 @@ def control_callback(msg):
     global fileCount
     global args
     global active
+    global ema
+    global activation
 
     # save the best image at the end of the observation period (on 'stop' message)
     if msg.data == 'stop':
@@ -140,6 +137,8 @@ def control_callback(msg):
 
     elif msg.data == 'start':
         active = True
+        ema = 0
+        activation = 0
         fileCount = len(next(os.walk(args.dir))[2])
         cv.namedWindow(NODE)
 
@@ -147,8 +146,12 @@ def main():
     global bridge
     global requestPub
     global fileCount
+    global args
+    global ema
+    global activation
 
     rospy.init_node(NODE)
+
     requestPub = rospy.Publisher('vision/control/request', Point, queue_size=1)
     
     # Instantiate CvBridge
@@ -161,6 +164,15 @@ def main():
     # create a percept subscriber
     perceptTopic = "/vision/perception"
     rospy.Subscriber(perceptTopic, Percept, percept_callback)
-    rospy.spin()
+
+    #rospy.spin()
+    # set rate to 1Hz
+    rate = rospy.Rate(0.5)
+    while not rospy.is_shutdown():
+        # exponential moving average (ema)
+        ema = weight*activation + (1-weight)*ema
+        activation = 0
+        rospy.loginfo("EMA: "+str(ema))
+        rate.sleep()
 
 main()

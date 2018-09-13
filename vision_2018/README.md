@@ -129,7 +129,7 @@ Adapts the 'cob' Tensorflow object detection output onto the vision/percept topi
 To run this in the Tiago simulator:
 
 ./tiago_sim.sh
-./cob.sh
+./cob.sh     (you may need to start your Python virtual environment)
 ./cob-gaze.sh
 
 Then use ./start.sh and ./stop.sh and finally ./kill.sh to control

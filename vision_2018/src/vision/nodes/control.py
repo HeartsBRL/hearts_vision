@@ -16,6 +16,13 @@ import random
 import Queue
 import argparse
 
+import logging
+class Filter(logging.Filter):
+    def filter(self, record):
+        return not (record.getMessage().startswith('State machine') or \
+        record.getMessage().startswith('Concurren') )
+logging.getLogger('rosout').addFilter(Filter())
+
 QMAX = 2
 
 ap = argparse.ArgumentParser()
@@ -34,19 +41,19 @@ queue = Queue.Queue()
 
 def shutdown():
     global end, sm
-    rospy.loginfo("shutting down..")
+    #rospy.loginfo("shutting down..")
     end = True
     sm.request_preempt()
 
 # True if we are still in a valid Inactive state (ie. unless start requested)
 def inactiveCallback(data,msg):
-    rospy.loginfo(msg)
+    #rospy.loginfo(msg)
     # return False when we want to terminate the monitoring state
     return msg.data != 'start'
 
 # True if we are still in a valid Active state (ie. unless stop requested)
 def activeCallback(data,msg):
-    rospy.loginfo(msg)
+    #rospy.loginfo(msg)
     return msg.data != 'stop'
 
 # A Queueing request always falsifies the queue monitor, pass the input to the QUEUE state
@@ -135,8 +142,12 @@ class Q(State):
         if 'point_in' in data and self.q.qsize() < QMAX:    
             # queue requested point (if the queue is empty)
             p = data.point_in
-            rospy.loginfo("QUEUE({0}): {1}, {2}, {3}".format(self.q.qsize(),p.x,p.y,p.z))
-            self.q.put(p)
+            #rospy.loginfo("QUEUE({0}): {1}, {2}, {3}".format(self.q.qsize(),p.x,p.y,p.z))
+            if not (p.x==0 and p.y==0 and p.z==0):
+                self.q.put(p)
+            else:
+                while not self.q.empty():
+                    self.q.get
 
         return 'stop' if end else 'continue'
 
@@ -181,8 +192,8 @@ class GazeControl:
 # terminator callback preempts other concurrent threads once the ACTIVE state is exited (by a stop request)
 
 def terminator(outcome_map):
-    rospy.loginfo("terminator")
-    print outcome_map
+    #rospy.loginfo("terminator")
+    #print outcome_map
     if 'SUBACTIVE' in outcome_map and outcome_map['SUBACTIVE']=='exit':
         return True
     return False
