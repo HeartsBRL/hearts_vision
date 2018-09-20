@@ -6,8 +6,7 @@ Machine vision related packages, etc
 11.7.18
 
 The packages: hearts_face_uniform, hearts_person_tracker are used with tbm2_welcoming_visitors.launch
-
-Link to fork - https://github.com/HeartsBRL/ros_people_object_detection_tensorflow
+Check: https://github.com/cagbal/ros_people_object_detection_tensorflow for missing packages
 
 # For Python 2.7.9
 
@@ -54,21 +53,21 @@ pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensor
 
 # Github cagbal code compilation
 
-cd && mkdir -p catkin_ws/src && cd ..
+cd ~/workspaces/hearts_erl
 
-catkin_make && cd src
+catkin_make && cd src/hearts_vision
 
 git clone --recursive https://github.com/cagbal/ros_people_object_detection_tensorflow.git
 
 git clone https://github.com/cagbal/cob_perception_common.git
 
-cd cob_people_object_detection_tensorflow/src
-
 (DO THIS BIT https://github.com/tensorflow/models/issues/1834)
+
+cd ~/workspaces/hearts_erl/src/hearts_vision/ros_people_object_detection_tensorflow/src
 
 ~/protoc_3.3/bin/protoc object_detection/protos/*.proto --python_out=.
 
-cd ~/catkin_ws
+cd ~/workspaces/hearts_erl
 
 rosdep install --from-path src/ -y -i
 
