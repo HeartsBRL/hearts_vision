@@ -25,6 +25,12 @@ class PS_broadcaster():
                 PoseStamped,
                 queue_size=1)
 
+        self.pubPos2 = rospy.Publisher(
+                "/look_at",
+                PoseStamped,
+                queue_size=1)
+
+
         #Publish to get what we want to say
         self.pubsay = rospy.Publisher(
             '/hearts/tts',
@@ -37,7 +43,7 @@ class PS_broadcaster():
 
     def decision_making(self):
 
-        rate = rospy.Rate(10) # update rate of 1hz
+        rate = rospy.Rate(10) # update rate of 10hz
 
         while not rospy.is_shutdown():
 
@@ -57,11 +63,13 @@ class PS_broadcaster():
                         self.final_pos.pose.position.y = data.detections[ObjectReal].pose.pose.position.y
                         self.final_pos.pose.position.z = data.detections[ObjectReal].pose.pose.position.z
                         self.pubPos.publish(self.final_pos)
+                        self.pubPos2.publish(self.final_pos)
                         self.flag=False
                         print("yeah")
                         break
 
-
+        else:
+            self.pubPos2.publish(self.final_pos)
 
 
 
