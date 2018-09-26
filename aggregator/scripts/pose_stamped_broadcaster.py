@@ -67,9 +67,18 @@ class PS_broadcaster():
                         self.flag=False
                         print("yeah")
                         break
-
+        #add routine to make tiago continually look at detected object
         else:
-            self.pubPos2.publish(self.final_pos)
+            if len(data.detections) > 0:
+                for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
+                    if data.detections[ObjectReal].label == self.args[1]:
+                        self.final_pos.header.frame_id = "xtion_rgb_optical_frame"
+                        #CHANGE HERE
+                        self.final_pos.pose.position.x = data.detections[ObjectReal].pose.pose.position.x
+                        self.final_pos.pose.position.y = data.detections[ObjectReal].pose.pose.position.y
+                        self.final_pos.pose.position.z = data.detections[ObjectReal].pose.pose.position.z
+                        self.pubPos2.publish(self.final_pos)
+                        break
 
 
 

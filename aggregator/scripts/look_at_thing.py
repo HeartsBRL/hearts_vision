@@ -20,7 +20,7 @@ def look_at(pose):
     goal.min_duration = rospy.Duration(1)
     goal.max_velocity = 0.25
     goal.target = point
-    headMove.send_goal_and_wait(goal)
+    headMove.send_goal(goal)
 
 
 
