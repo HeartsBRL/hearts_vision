@@ -1,0 +1,28 @@
+##GUIDE TO RUN TIAGO VISION
+
+### Open terminal
+
+
+#SHELL 1 (Camera + Tensorflow + rviz)
+    roslaunch aggregator tiago_vision_end.launch
+
+#SHELL 2 (Display tf detection)
+    rosrun aggregator tf_broadcaster.py
+#Line 36 to change XYZ coordinates
+
+#SHELL 3 (3D position is being published)
+    rostopic echo /object_detection/realworld/position
+
+#If you don't see any message in SHELL 3: Ctrl+C and start again
+
+
+
+
+#IF ALL PREVIOUS IS WORKING MOVE ON
+
+
+#SHELL 4 (Send pose and speech to Richard's code)
+    rosrun aggregator pose_stamped_broadcaster.py bottle
+
+#Change bottle by the detected label
+#Lines 55,56,57 to change XYZ coordinates

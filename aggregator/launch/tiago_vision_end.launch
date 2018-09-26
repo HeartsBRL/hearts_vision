@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- Cagbal code to detect object and people -->
+  <include file="$(find cob_people_object_detection_tensorflow)/launch/alltogether.launch"/>
+  <!-- RVIZ visualisation node -->
+  <node pkg="rviz" type="rviz" name="$(anon rviz)" args="/home/hearts/.rviz/tiago.rviz" />
+
+
+  <!-- Aggregator node -->
+  <!-- <node name="aggregator" pkg="aggregator" type="pose_stamped_broadcaster.py" respawn="true" > -->
+  <!-- </node> -->
+</launch>
