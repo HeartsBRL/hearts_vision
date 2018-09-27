@@ -89,4 +89,4 @@ if __name__ == '__main__': #Main function that calls other functions
     rospy.init_node('body_data_handling', anonymous=True) # Node initialisation ANONYMOUS=True to allow different nodes with the same name
     n = PS_broadcaster() #Class instantiation
     n.decision_making()
-rospy.spin() # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin() # spin() simply keeps python from exiting until this node is stopped

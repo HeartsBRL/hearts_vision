@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+
+<launch>
+  <include file="$(find cob_people_object_detection_tensorflow)/launch/cob_face_recognizer.launch" />
+</launch>
