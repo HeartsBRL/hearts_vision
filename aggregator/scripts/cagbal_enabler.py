@@ -15,18 +15,20 @@ class PS_broadcaster():
     def __init__(self):
         self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(self.uuid)
-        self.obj_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/assistedliving/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/object_detector.launch"])
-        self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/assistedliving/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
-    def decision_making(self):
+        self.obj_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/object_detector.launch"])
 
+    def decision_making(self):
         rate = rospy.Rate(10) # update rate of 10hz
         self.obj_launch.start()
         while not rospy.is_shutdown():
             rospy.loginfo("Only objects!")
-            input("Press to add face recog")
+            # z = input("Press to add face recog")
+            rospy.sleep(10)
+            self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
             self.face_launch.start()
             rospy.loginfo("Detecting faces")
-            input("Press to remove face recog")
+            # z = input("Press to remove face recog")
+            rospy.sleep(10)
             self.face_launch.shutdown()
             rate.sleep()
         self.obj_launch.shutdown()
