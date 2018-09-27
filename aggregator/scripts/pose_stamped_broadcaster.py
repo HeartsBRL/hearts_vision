@@ -52,6 +52,7 @@ class PS_broadcaster():
     #Function to be run when some data arrives from the ROSBAG
 
     def positionCallback(self, data):
+        look = False
         if self.flag:
             if len(data.detections) > 0:
                 for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
@@ -65,10 +66,11 @@ class PS_broadcaster():
                         self.pubPos.publish(self.final_pos)
                         self.pubPos2.publish(self.final_pos)
                         self.flag=False
+                        look = True
                         print("yeah")
                         break
         #add routine to make tiago continually look at detected object
-        else:
+        elif look:
             if len(data.detections) > 0:
                 for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
                     if data.detections[ObjectReal].label == self.args[1]:
