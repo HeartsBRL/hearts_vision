@@ -4,5 +4,6 @@
   <include file="$(find cob_people_object_detection_tensorflow)/launch/cob_people_object_detection_tensorflow.launch" />
   <include file="$(find cob_people_object_detection_tensorflow)/launch/projection.launch" />
   <include file="$(find cob_people_object_detection_tensorflow)/launch/cob_people_object_tracker.launch" />
+  <node pkg="rviz" type="rviz" name="$(anon rviz)" args="/home/hearts/.rviz/tiago.rviz" />
 
 </launch>
