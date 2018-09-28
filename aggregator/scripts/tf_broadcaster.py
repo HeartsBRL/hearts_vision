@@ -39,6 +39,7 @@ class tf_broadcaster():
             Array.detections[Object].label, #child frame (The given joint)
             "xtion_optical_frame")	#parent frame (Started being called "world" Coordinates [0 0 0])
             #"camera_link")	#parent frame (Started being called "world" Coordinates [0 0 0])
+        rospy.sleep(0.1)
 
 ################################MAIN SCRIPT#############################
 

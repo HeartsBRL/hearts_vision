@@ -4,6 +4,7 @@ import roslib #Ros libraries
 import rospy #Python library
 import tf #ROS Transform library
 import roslaunch
+from actionlib import SimpleActionClient
 from cob_perception_msgs.msg import DetectionArray, Detection#, DetectionLife, Life #Cagbal messages
 from geometry_msgs.msg import PointStamped, PoseStamped
 from control_msgs.msg import PointHeadAction, PointHeadGoal
@@ -43,34 +44,42 @@ class vision_sense():
             '/head_controller/point_head_action/goal',
             PointHeadGoal,
             queue_size=1)
+        self.headMove = SimpleActionClient('/head_controller/point_head_action', PointHeadAction)
+        #self.headMove.wait_for_server()
 
         self.final_pos = PoseStamped()
         self.args = rospy.myargv(argv=sys.argv) # rospy adapatation of sys arguments
         self.flag = True
         #TBM3 lists EXAMPLE
-        self.CagbalList_containers = ["bottle" "mug" "cup"];
+        self.CagbalList_containers = ["bottle", "mug","cup"];
 
         ######Main variables for launching different vision group of files in Cagbal#####
         self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(self.uuid)
-        obj_launch()
-############GAZE CONTROL METHOD######################
-    def look_at(pose):
-        goal = PointHeadGoal()
-        point = PointStamped()
-        point.point.x = pose.pose.position.x
-        point.point.y = pose.pose.position.y
-        point.point.z = pose.pose.position.z
-        point.header.frame_id = "/xtion_rgb_optical_frame"
+        self.goal = PointHeadGoal()
+        self.point = PointStamped()
+        self.obj_launch()
 
-        goal.pointing_frame = "/xtion_rgb_optical_frame"
-        goal.pointing_axis.x = 0.0;
-        goal.pointing_axis.y = 0.0;
-        goal.pointing_axis.z = 1.0;
-        goal.min_duration = rospy.Duration(1)
-        goal.max_velocity = 0.25
-        goal.target = point
-        headP.publish(goal)
+############GAZE CONTROL METHOD######################
+    def look_at(self,poseReal):
+        print("looking at object")
+        #goal = PointHeadGoal()
+        #point = PointStamped()
+        self.point.point.x = poseReal.pose.position.x
+        self.point.point.y = poseReal.pose.position.y
+        self.point.point.z = poseReal.pose.position.z
+        self.point.header.frame_id = "/xtion_rgb_optical_frame"
+
+        self.goal.pointing_frame = "/xtion_rgb_optical_frame"
+        self.goal.pointing_axis.x = 0.0;
+        self.goal.pointing_axis.y = 0.0;
+        self.goal.pointing_axis.z = 1.0;
+        self.goal.min_duration = rospy.Duration(1)
+        self.goal.max_velocity = 0.25
+        self.goal.target = self.point
+        print("publishing")
+        self.headP.publish(self.goal)
+        self.headMove.send_goal_and_wait(self.goal)
 ###################################METHOD FOR PUBLISHING DECISIONS#################
     def decision_making(self):
 
@@ -100,6 +109,7 @@ class vision_sense():
     #Function to be run when some data arrives from the ROSBAG
 
     def positionCallback(self, data):
+        print("callback running")
         if self.flag:
             if len(data.detections) > 0:
                 for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
@@ -111,21 +121,22 @@ class vision_sense():
                         self.final_pos.pose.position.y = data.detections[ObjectReal].pose.pose.position.y
                         self.final_pos.pose.position.z = data.detections[ObjectReal].pose.pose.position.z
                         self.pubPos.publish(self.final_pos)
-                        look_at(self.final_pos)
+                        self.look_at(self.final_pos)
                         self.flag=False
                         print("yeah")
                         break
         #add routine to make tiago continually look at detected object
         else:
-            if len(data.detections) > 0:
+            if False: #len(data.detections) > 0:
                 for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
-                    if data.detections[ObjectReal].label == self.args[1]:
+                    if data.detections[ObjectReal].label in self.CagbalList_containers:
                         self.final_pos.header.frame_id = "xtion_rgb_optical_frame"
                         #CHANGE HERE
                         self.final_pos.pose.position.x = data.detections[ObjectReal].pose.pose.position.x
                         self.final_pos.pose.position.y = data.detections[ObjectReal].pose.pose.position.y
                         self.final_pos.pose.position.z = data.detections[ObjectReal].pose.pose.position.z
-                        look_at(self.final_pos)
+                        #self.look_at(self.final_pos)
+                        print("Sending")
                         break
 
 
