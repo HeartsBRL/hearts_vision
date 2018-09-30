@@ -1,0 +1,40 @@
+# DANIEL HEARTS TEAM MODIFICATION (Remove the 0.001 factor as it apparently publishes coordiantes in kilometers) Without 0.001 is meters)
+
+  ORIGINAL:
+
+        real_x = (x + width/2-self.cx)*(depth_mean*0.001)/self.f
+
+        real_y = (y + height/2-self.cy)*(depth_mean*0.001)/self.f
+
+
+        msg.detections[i].pose.pose.position.x = real_x
+        msg.detections[i].pose.pose.position.y = real_y
+        msg.detections[i].pose.pose.position.z = depth_mean*0.001
+
+  AFTER CHANGES:
+
+        real_x = (x + width/2-self.cx)*(depth_mean)/self.f        <--
+
+        real_y = (y + height/2-self.cy)*(depth_mean)/self.f       <--
+
+
+        msg.detections[i].pose.pose.position.x = real_x
+        msg.detections[i].pose.pose.position.y = real_y
+        msg.detections[i].pose.pose.position.z = depth_mean       <--
+
+  DONE IN projections.py line 114
+
+# DANIEL HEARTS TEAM MODIFICATION (Change to the parameters of proyection.py for easier tuning)
+
+  # Reduction factor for depth calculation
+
+        RF: 0.8
+
+  DONE IN projections_params.yaml in line 19
+
+# DANIEL HEARTS TEAM MODIFICATION (Reduce width and height of the bounding box to avoid background depth values from influencing the mean)
+
+          width =  detection.mask.roi.width   -->         width =  int(round(detection.mask.roi.width*RF))
+          height = detection.mask.roi.height  -->         height = int(round(detection.mask.roi.height*RF))
+
+  DONE IN projections.py line 101
