@@ -15,24 +15,25 @@ class PS_broadcaster():
     def __init__(self):
         self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(self.uuid)
-        self.obj_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/object_detector.launch"])
+        self.obj_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/object_detector_RVIZ.launch"])
 
     def decision_making(self):
         rate = rospy.Rate(10) # update rate of 10hz
         self.obj_launch.start()
         while not rospy.is_shutdown():
             rospy.loginfo("Only objects!")
-            # z = input("Press to add face recog")
-            rospy.sleep(10)
+            raw_input("Press Enter to add face recog")
+
             self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
             self.face_launch.start()
-            rospy.loginfo("Detecting faces")
-            # z = input("Press to remove face recog")
             rospy.sleep(10)
+            rospy.loginfo("Detecting faces")
+            raw_input("Press Enter to remove face recog")
+            #rospy.sleep(10)
             self.face_launch.shutdown()
             rate.sleep()
-        self.obj_launch.shutdown()
-        rospy.loginfo("Everything is OFF")
+        #self.obj_launch.shutdown()
+        #rospy.loginfo("Everything is OFF")
 
 
 
@@ -41,7 +42,7 @@ class PS_broadcaster():
 
 if __name__ == '__main__': #Main function that calls other functions
 
-    rospy.init_node('launch_manager', anonymous=True) # Node initialisation ANONYMOUS=True to allow different nodes with the same name
+    rospy.init_node('launch_manager', anonymous=False) # Node initialisation ANONYMOUS=Falee to disallow different nodes with the same name
     n = PS_broadcaster() #Class instantiation
     n.decision_making()
     rospy.spin() # spin() simply keeps python from exiting until this node is stopped
