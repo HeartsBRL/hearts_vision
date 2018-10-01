@@ -107,6 +107,7 @@ class person_tracking():
                     verdict_msg = Face_recog_verdict()
                     verdict_msg.best_pick = "No people"
                     self.pubRecog.publish(verdict_msg)
+                    self.DInfo.decision ="Done"
                 elif self.DInfo.decision == "Calculating":
                     self.PeopleConfidencePercent = [x*100 / self.Total_detections for x in self.PeopleConfidence]
                     print(self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))])

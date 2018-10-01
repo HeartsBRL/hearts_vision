@@ -71,20 +71,20 @@ class person_tracking():
         self.Flag = True
     #Parameters for making decision on people
         self.PersonFreq = rospy.Duration(1)
-        self.PersonFreqLoss = rospy.Duration(3)
+        self.PersonFreqLoss = rospy.Duration(1) #Good one
         self.PersonThresh = 0.6
         self.DetecTimeP = rospy.Time.now()
     #Parameters for making decision on nothing detected
         self.DetecTimeL = rospy.Time.now()
-        self.TotalFreqLoss = rospy.Duration(5)
+        self.TotalFreqLoss = rospy.Duration(2)
 
     #Score Thresholds
         self.ScoreThres = 0.5
 
     #List of detected humans
-        self.Tracking_started = False
+        self.Tracking_started = True #CHANGE!!!!
         self.DetecTime2Stop = rospy.Time.now()
-        self.Scanning_Time = rospy.Duration(3)
+        self.Scanning_Time = rospy.Duration(5)
         self.Stop = False # Initial flag
     #List of detected humans
         self.KnownPeople = []
@@ -111,17 +111,26 @@ class person_tracking():
                     verdict_msg = Tracking_info()
                     verdict_msg.decision = "Person Lost"
                     self.pubDec.publish(verdict_msg)
+                    self.DInfo.decision = "Done"
+                    self.Stop = False
+                    self.Tracking_started = False
                 elif self.DInfo.decision == "Person Tracked":
 
                     #PUBLISH VERDICT
                     verdict_msg = Tracking_info()
                     verdict_msg.decision = "Person Tracked"
                     self.pubDec.publish(verdict_msg)
+                    self.DInfo.decision = "Done"
+                    self.Stop = False
+                    self.Tracking_started = False
                 else:
                     #PUBLISH VERDICT
                     verdict_msg = Tracking_info()
                     verdict_msg.decision = "Something went wrong"
                     self.pubDec.publish(verdict_msg)
+                    self.DInfo.decision = "Done"
+                    self.Stop = False
+                    self.Tracking_started = False
             rate.sleep()
 
 # ###################################OBJECT LAUNCH#################
@@ -152,11 +161,13 @@ class person_tracking():
                 "/object_detection/detections",
                 DetectionArray,
                 self.callback)
-        self.Tracking_started = True
+        #self.Tracking_started = True   #Reset later THIS SHOULD COME FROM THE TBM2 CONTROLLER.PY
+
 #Decision making based on data received by object and people detection modules
 #Data SCORE and FREQUENCY are the two values considered for the decision
     def callback(self, data):
-        self.Tracking_started = True
+        #self.Tracking_started = True #Reset later THIS SHOULD COME FROM THE TBM2 CONTROLLER.PY
+
         if len(data.detections) > 0:
             #By default de person is LOST and other IF statement will update this
             self.DInfo.decision = "Person Lost"
