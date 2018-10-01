@@ -38,6 +38,11 @@ class person_tracking():
                 "/face_recognizer/faces",
                 DetectionArray,
                 self.callback)
+        # Listens to the objection and people detection modules
+        self.subDetec = rospy.Subscriber(
+                "/face_recognizer/faces",
+                DetectionArray,
+                self.callback)
         # Gaze control subscriber and publishers
         self.gaze = rospy.Publisher(
                 "/look_at",

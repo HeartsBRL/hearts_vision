@@ -49,7 +49,7 @@ class person_tracking():
 
 
 
-            
+
         # Listens to tbm2_controller
         self.subConFlag = rospy.Subscriber(
                 "/recognising_visitor/controller",
@@ -103,6 +103,10 @@ class person_tracking():
             if self.Stop:
                 if self.DInfo.decision == "No people":
                     print("No one was seen")
+                    #PUBLISH VERDICT
+                    verdict_msg = Face_recog_verdict()
+                    verdict_msg.best_pick = "No people"
+                    self.pubRecog.publish(verdict_msg)
                 elif self.DInfo.decision == "Calculating":
                     self.PeopleConfidencePercent = [x*100 / self.Total_detections for x in self.PeopleConfidence]
                     print(self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))])

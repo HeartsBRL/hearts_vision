@@ -11,7 +11,7 @@ from control_msgs.msg import PointHeadAction, PointHeadGoal
 from std_msgs.msg import String
 
 
-class vision_sense():
+class face_recog():
 
     def __init__(self):
 ################################CLASS INITIALISATION#############################
@@ -126,6 +126,6 @@ class vision_sense():
 if __name__ == '__main__': #Main function that calls other functions
 
     rospy.init_node('vision_aggregator', anonymous=True) # Node initialisation ANONYMOUS=True to allow different nodes with the same name
-    n = vision_sense() #Class instantiation
+    n = face_recog() #Class instantiation
     n.decision_making()
     rospy.spin() # spin() simply keeps python from exiting until this node is stopped
