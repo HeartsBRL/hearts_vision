@@ -10,12 +10,12 @@
         pkg="vision"
         type="watch.py"
         output="screen"/>
-    <node
+    <!--node
         name="control"
         pkg="vision"
         type="control.py"
         args="$(arg ctl-wait) $(arg ctl-bounds) $(arg ctl-coords)"
-        output="screen"/>
+        output="screen"/-->
     <node
         name="orb_detector"
         pkg="vision"

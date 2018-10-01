@@ -113,8 +113,8 @@ class Gaze(State):
             y = self.coords['y'] + random.uniform(-self.bounds[1],self.bounds[1])
             z = self.coords['z'] + random.uniform(-self.bounds[2],self.bounds[2])
 
-        self.gazeControl.look(x,y,z)
-        self.gazeControl.publish(x,y,z)
+        #self.gazeControl.look(x,y,z)
+        #self.gazeControl.publish(x,y,z)
         sleep(args.wait)
         return 'stop' if end else 'continue'
 
@@ -126,20 +126,20 @@ class Gaze(State):
         x = constants.AHEAD['x']
         y = constants.AHEAD['y']
         z = constants.AHEAD['z']
-        self.gazeControl.look(x,y,z)
+        #self.gazeControl.look(x,y,z)
 
 class Q(State):
     def __init__(self,queue):
         State.__init__(self, outcomes=['continue','stop','exit'], input_keys=['point_in'])
         self.q = queue
-    
+
     def execute(self, data):
         global end
         if self.preempt_requested():
             self.service_preempt()
             return 'exit'
 
-        if 'point_in' in data and self.q.qsize() < QMAX:    
+        if 'point_in' in data and self.q.qsize() < QMAX:
             # queue requested point (if the queue is empty)
             p = data.point_in
             #rospy.loginfo("QUEUE({0}): {1}, {2}, {3}".format(self.q.qsize(),p.x,p.y,p.z))
@@ -156,15 +156,15 @@ class Q(State):
 
 class GazeControl:
     def __init__(self):
-        self.ac = SimpleActionClient('/head_controller/point_head_action', PointHeadAction)
+        #self.ac = SimpleActionClient('/head_controller/point_head_action', PointHeadAction)
         rospy.loginfo('waiting for action server..')
-        self.ac.wait_for_server() #rospy.Duration(5.0)
+        #self.ac.wait_for_server() #rospy.Duration(5.0)
         self.pub = rospy.Publisher('vision/control/gaze', Point, queue_size=1)
 
 # The base_link coordinate frame is relative to the mobile robot base: x forward, y left(+ve)/right(-ve), z height
 # see: http://www.ros.org/reps/rep-0103.html and http://www.ros.org/reps/rep-0105.html
- 
-    def look(self, x, y, z, block=False):
+
+    '''def look(self, x, y, z, block=False):
         global args
         g = PointHeadGoal()
         g.pointing_frame = 'xtion_optical_frame'
@@ -176,9 +176,9 @@ class GazeControl:
         g.target.point.y = y
         g.target.point.z = z
         if block:
-            self.ac.send_goal_and_wait(g)
+            #self.ac.send_goal_and_wait(g)
         else:
-            self.ac.send_goal(g)
+            #self.ac.send_goal(g)
         # wait for the head movement to finish
         sleep(1)
 
@@ -187,7 +187,7 @@ class GazeControl:
         p.x = x
         p.y = y
         p.z = z
-        self.pub.publish(p)
+        self.pub.publish(p)'''
 
 # terminator callback preempts other concurrent threads once the ACTIVE state is exited (by a stop request)
 
@@ -206,20 +206,20 @@ def main():
     rospy.on_shutdown(shutdown)
     rospy.init_node('control')
 
-    gc = GazeControl()
+    #gc = GazeControl()
 
     sm = StateMachine(outcomes=['stop'])
     with sm:
         # state-machine starts in Inactive state
         StateMachine.add('INACTIVE', Inactive(), transitions={'continue':'INACTIVE_MONITOR', 'stop':'stop'})
-        
+
         StateMachine.add('INACTIVE_MONITOR', MonitorState('/vision/control',String,inactiveCallback),
         # INVALID : termination of the monitoring state and transition to the next state
         # VALID : monitoring condition holds so remain in current state
         transitions={'invalid':'CONACTIVE', 'valid':'INACTIVE', 'preempted':'INACTIVE'})
 
         # concurrent container for CONACTIVE state with children: SUBACTIVE
-        conActive = Concurrence(outcomes=['exit','stop'], default_outcome='exit', 
+        conActive = Concurrence(outcomes=['exit','stop'], default_outcome='exit',
         outcome_map={'exit':{'SUBACTIVE':'exit'}, 'stop':{'SUBACTIVE':'stop'}},
         child_termination_cb = terminator)
 
@@ -253,7 +253,7 @@ def main():
             StateMachine.add('QUEUE', Q(queue), transitions={'continue':'QUEUE_MONITOR', 'stop':'stop', 'exit':'exit'},
             remapping={'point_in':'point'})
             StateMachine.add('QUEUE_MONITOR', MonitorState('/vision/control/request',Point, queueCallback, output_keys=['point_out']),
-            transitions={'invalid':'QUEUE', 'valid':'QUEUE', 'preempted':'exit'}, remapping={'point_out':'point'})            
+            transitions={'invalid':'QUEUE', 'valid':'QUEUE', 'preempted':'exit'}, remapping={'point_out':'point'})
 
         # build concurrent container
         with conActive:
