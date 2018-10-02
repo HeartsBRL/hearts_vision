@@ -41,11 +41,11 @@ class face_recognizer():
 
 
 
-        #       DELETE AFTER TESTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        self.subDetec = rospy.Subscriber(
-                "/face_recognizer/faces",
-                DetectionArray,
-                self.callback)
+        # #       DELETE AFTER TESTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # self.subDetec = rospy.Subscriber(
+        #         "/face_recognizer/faces",
+        #         DetectionArray,
+        #         self.callback)
 
 
 
@@ -83,7 +83,7 @@ class face_recognizer():
         self.TotalFreqLoss = rospy.Duration(5)
 
     #List of detected humans
-        self.KnownPeople = ["doctor","postman","Unknown"]
+        self.KnownPeople = ["doctor","postman","unknown"]
         self.PeopleConfidence = [0,0,0]
         self.Total_detections = 0
 
@@ -107,6 +107,7 @@ class face_recognizer():
                     verdict_msg.best_pick = "No people"
                     self.pubRecog.publish(verdict_msg)
                     self.DInfo.decision ="Done"
+                    self.face_kill_launch()
                 #Verdict if it was still detecting faces
                 elif self.DInfo.decision == "Calculating":
                     self.PeopleConfidencePercent = [x*100 / self.Total_detections for x in self.PeopleConfidence]
@@ -117,6 +118,7 @@ class face_recognizer():
                     verdict_msg = Face_recog_verdict()
                     verdict_msg.best_pick = self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))]
                     self.pubRecog.publish(verdict_msg)
+                    self.face_kill_launch()
 
 
             rate.sleep()
@@ -126,16 +128,16 @@ class face_recognizer():
 #         self.obj_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/object_detector.launch"])
 #         self.obj_launch.start()
 # ###################################FACE LAUNCH#################
-#     def face_launch(self):
-#         self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
-#         self.face_launch.start()
+    def face_launch(self):
+        self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
+        self.face_launch.start()
 # ###################################TURNING OFF OBJECT LAUNCH#################
 #     def obj_kill_launch(self):
 #         self.obj_launch.shutdown()
 #
 # ###################################TURNING OFF FACE LAUNCH#################
-#     def face_kill_launch(self):
-#         self.face_launch.shutdown()
+    def face_kill_launch(self):
+        self.face_launch.shutdown()
 
 ######WE INITIALLY DO NOT NEED TRACKING THE FACE
 
@@ -152,6 +154,8 @@ class face_recognizer():
                 "/face_recognizer/faces",
                 DetectionArray,
                 self.callback)
+        rospy.loginfo("Launching face recognition")
+        self.face_launch()
 
 
 #Decision making based on data received by object and people detection modules
