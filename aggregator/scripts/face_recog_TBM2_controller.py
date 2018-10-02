@@ -61,10 +61,10 @@ class face_recognizer():
                 PoseStamped,
                 queue_size=1)
 
-        self.coor = rospy.Subscriber(
-            "/object_detection/realworld/position",
-            DetectionArray,
-            self.coordinates) #Name // Type of message and Callback
+        # self.coor = rospy.Subscriber(
+        #     "/object_detection/realworld/position",
+        #     DetectionArray,
+        #     self.coordinates) #Name // Type of message and Callback
 
     #Default info display
         self.DInfo = DetectedInfo() # Message to publish decision
@@ -73,7 +73,7 @@ class face_recognizer():
         self.DInfo.id = "Unknown"
         self.DInfo.decision = "None"
         #Variable to publish only if the state changes
-        self.Flag = True
+        self.Flag = False
     #Parameters for making decision on people
 
         self.DetecTimeP = rospy.Time.now() # Scanning variable to STOP FACE RECOG
@@ -97,6 +97,8 @@ class face_recognizer():
         rate = rospy.Rate(10) # update rate of 1hz
 
         while not rospy.is_shutdown():
+            if not self.Flag:
+                self.DetecTimeP = rospy.Time.now()
             self.Stop = (rospy.Time.now()-self.DetecTimeP) >   self.Scanning_Time
             if self.Stop:
                 #Verdict when no faces were detected
@@ -117,8 +119,11 @@ class face_recognizer():
                     #PUBLISH VERDICT
                     verdict_msg = Face_recog_verdict()
                     verdict_msg.best_pick = self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))]
+                    rospy.loginfo("Publishing detected faces")
                     self.pubRecog.publish(verdict_msg)
+                    rospy.loginfo("Killing face cagbal...")
                     self.face_kill_launch()
+
 
 
             rate.sleep()
@@ -141,15 +146,16 @@ class face_recognizer():
 
 ######WE INITIALLY DO NOT NEED TRACKING THE FACE
 
-###Gaze tracking
-    def coordinates(self, RealWorld):
-        if self.DInfo.decision == "Person Tracked":
-            yeah2=1
-            # self.gaze.publish(RealWorld.detections[ObjectReal].pose)
+# ###Gaze tracking
+#     def coordinates(self, RealWorld):
+#         if self.DInfo.decision == "Person Tracked":
+#             yeah2=1
+#             # self.gaze.publish(RealWorld.detections[ObjectReal].pose)
 
 
     def controller_callback(self,msg):
         # Listens to the objection and people detection modules
+        rospy.loginfo("Message received from main controller")
         self.subDetec = rospy.Subscriber(
                 "/face_recognizer/faces",
                 DetectionArray,
@@ -161,6 +167,8 @@ class face_recognizer():
 #Decision making based on data received by object and people detection modules
 #Data SCORE and FREQUENCY are the two values considered for the decision
     def callback(self, data):
+        self.Flag = True #To start the count down for detection
+        rospy.loginfo("Starting Countdown")
         if not self.Stop:
             if len(data.detections) > 0:
 
@@ -172,6 +180,7 @@ class face_recognizer():
                 self.DetecTimeL=rospy.Time.now()
                 self.DInfo.score = 0
                 self.DInfo.label = "Face detected"
+                rospy.loginfo("Face detected")
                 self.DInfo.decision = "Calculating"
                 self.Flag = True
 
@@ -181,6 +190,7 @@ class face_recognizer():
                 self.DInfo.score = 0
                 self.DInfo.label = "Nothing"
                 self.DInfo.decision = "No people"
+                rospy.loginfo("No faces were detected")
                 self.Flag = True
 
 
