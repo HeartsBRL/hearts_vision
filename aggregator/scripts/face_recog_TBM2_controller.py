@@ -22,7 +22,7 @@ from cob_perception_msgs.msg import DetectionArray, Detection#Cagbal messages
 from geometry_msgs.msg import PoseStamped
 #from vision.msg import Percept
 
-class person_tracking():
+class face_recognizer():
 
     # Initialization happens when the object is created:
     def __init__(self):
@@ -140,9 +140,10 @@ class person_tracking():
 ######WE INITIALLY DO NOT NEED TRACKING THE FACE
 
 ###Gaze tracking
-    # def coordinates(self, RealWorld):
-    #     if self.DInfo.decision == "Person Tracked":
-    #         self.gaze.publish(RealWorld.detections[ObjectReal].pose)
+    def coordinates(self, RealWorld):
+        if self.DInfo.decision == "Person Tracked":
+            yeah2=1
+            # self.gaze.publish(RealWorld.detections[ObjectReal].pose)
 
 
     def controller_callback(self,msg):
@@ -183,9 +184,9 @@ class person_tracking():
 
 
 if __name__ == '__main__':
-    rospy.init_node("person_tracking", anonymous=True)
+    rospy.init_node("face_recognizer", anonymous=True)
 
-    n = person_tracking()
+    n = face_recognizer()
     n.decision_making()
 
     rospy.spin()
