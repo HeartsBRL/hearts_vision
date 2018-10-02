@@ -15,6 +15,7 @@ import roslib
 import time
 import tf #ROS Transform library
 import sys
+import roslaunch
 from std_msgs.msg import String
 from std_msgs.msg import Int32
 from aggregator.msg import DetectedInfo, Tracking_info# My personal messages

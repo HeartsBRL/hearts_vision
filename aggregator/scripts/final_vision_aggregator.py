@@ -58,7 +58,7 @@ class vision_sense():
         roslaunch.configure_logging(self.uuid)
         self.goal = PointHeadGoal()
         self.point = PointStamped()
-        self.obj_launch()
+        self.face_launch()
 
 ############GAZE CONTROL METHOD######################
     def look_at(self,poseReal):
