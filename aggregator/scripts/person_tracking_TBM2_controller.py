@@ -50,6 +50,8 @@ class person_tracking():
                 "/object_detection/detections",
                 DetectionArray,
                 self.callback)
+
+
         # Gaze control subscriber and publishers
         self.gaze = rospy.Publisher(
                 "/look_at",
@@ -70,21 +72,22 @@ class person_tracking():
         #Variable to publish only if the state changes
         self.Flag = True
     #Parameters for making decision on people
-        self.PersonFreq = rospy.Duration(1)
-        self.PersonFreqLoss = rospy.Duration(1) #Good one
-        self.PersonThresh = 0.6
+        self.PersonFreq = rospy.Duration(1) #Accepted frequency of person in front of the camera
+        self.PersonFreqLoss = rospy.Duration(2) #We considered the person lost if this time goes between detections
         self.DetecTimeP = rospy.Time.now()
     #Parameters for making decision on nothing detected
-        self.DetecTimeL = rospy.Time.now()
-        self.TotalFreqLoss = rospy.Duration(2)
+        #self.DetecTimeL = rospy.Time.now()
+        #self.TotalFreqLoss = rospy.Duration(2)
 
     #Score Thresholds
         self.ScoreThres = 0.5
 
     #List of detected humans
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
         self.Tracking_started = True #CHANGE!!!!
+
         self.DetecTime2Stop = rospy.Time.now()
-        self.Scanning_Time = rospy.Duration(5)
+        self.Scanning_Time = rospy.Duration(5) #Scanning variable to decide when to stop
         self.Stop = False # Initial flag
     #List of detected humans
         self.KnownPeople = []
@@ -99,7 +102,7 @@ class person_tracking():
             #Reset time variables until
             if not self.Tracking_started:
                 self.DetecTimeP=rospy.Time.now()
-                self.DetecTimeL=rospy.Time.now()
+                #self.DetecTimeL=rospy.Time.now()
                 self.DetecTime2Stop = rospy.Time.now()
 
             if not self.Stop:
@@ -107,7 +110,7 @@ class person_tracking():
             if self.Stop:
                 if self.DInfo.decision == "Person Lost":
                     print("No one was seen")
-                    #PUBLISH VERDICT
+                    #PUBLISH VERDICT IF THE VISITOR WENT OUT OF THE RANGE OF VISION
                     verdict_msg = Tracking_info()
                     verdict_msg.decision = "Person Lost"
                     self.pubDec.publish(verdict_msg)
@@ -116,7 +119,7 @@ class person_tracking():
                     self.Tracking_started = False
                 elif self.DInfo.decision == "Person Tracked":
 
-                    #PUBLISH VERDICT
+                    #PUBLISH VERDICT IF THE PERSON WAS ALWAYS WITHIN THE RANGE OF VISION
                     verdict_msg = Tracking_info()
                     verdict_msg.decision = "Person Tracked"
                     self.pubDec.publish(verdict_msg)
@@ -124,7 +127,7 @@ class person_tracking():
                     self.Stop = False
                     self.Tracking_started = False
                 else:
-                    #PUBLISH VERDICT
+                    #PUBLISH VERDICT IF SOMETHING WENT WRONG
                     verdict_msg = Tracking_info()
                     verdict_msg.decision = "Something went wrong"
                     self.pubDec.publish(verdict_msg)
@@ -194,7 +197,7 @@ class person_tracking():
 
                         # Reset time counters
                         self.DetecTimeP=rospy.Time.now()
-                        self.DetecTimeL=rospy.Time.now()
+                        #self.DetecTimeL=rospy.Time.now()
                     #If already a person stored check if the ID matches
                     elif PotPerson and self.DInfo.id != "Unknown":
                         if str(data.detections[ObjectReal].id) == self.DInfo.id:
@@ -202,7 +205,7 @@ class person_tracking():
                             self.Flag = True
                         # Reset time counters
                         self.DetecTimeP=rospy.Time.now()
-                        self.DetecTimeL=rospy.Time.now()
+                        #self.DetecTimeL=rospy.Time.now()
 
 
 

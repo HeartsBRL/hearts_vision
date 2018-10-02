@@ -75,22 +75,20 @@ class person_tracking():
         #Variable to publish only if the state changes
         self.Flag = True
     #Parameters for making decision on people
-        self.PersonFreq = rospy.Duration(1)
-        self.PersonFreqLoss = rospy.Duration(3)
-        self.PersonThresh = 0.6
-        self.DetecTimeP = rospy.Time.now()
+
+        self.DetecTimeP = rospy.Time.now() # Scanning variable to STOP FACE RECOG
+        self.Scanning_Time = rospy.Duration(10)
     #Parameters for making decision on nothing detected
-        self.DetecTimeL = rospy.Time.now()
+        self.DetecTimeL = rospy.Time.now() # Scanning time to give up looking for people
         self.TotalFreqLoss = rospy.Duration(5)
-    #Score Thresholds
-        self.ScoreThres = 0.5
 
     #List of detected humans
-        self.KnownPeople = ["Doctor_Kimble","Postman","Unknown","joedaly"]
-        self.PeopleConfidence = [0,0,0,0]
+        self.KnownPeople = ["doctor","postman","Unknown"]
+        self.PeopleConfidence = [0,0,0]
         self.Total_detections = 0
-        self.Scanning_Time = rospy.Duration(10)
-        # self.face_launch()
+
+        # self.face_launch() ##UNCOMMENT TO TEST ON ROBOT
+
 #Main loop to publish decisions
 
 
@@ -101,6 +99,7 @@ class person_tracking():
         while not rospy.is_shutdown():
             self.Stop = (rospy.Time.now()-self.DetecTimeP) >   self.Scanning_Time
             if self.Stop:
+                #Verdict when no faces were detected
                 if self.DInfo.decision == "No people":
                     print("No one was seen")
                     #PUBLISH VERDICT
@@ -108,6 +107,7 @@ class person_tracking():
                     verdict_msg.best_pick = "No people"
                     self.pubRecog.publish(verdict_msg)
                     self.DInfo.decision ="Done"
+                #Verdict if it was still detecting faces
                 elif self.DInfo.decision == "Calculating":
                     self.PeopleConfidencePercent = [x*100 / self.Total_detections for x in self.PeopleConfidence]
                     print(self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))])
@@ -118,13 +118,7 @@ class person_tracking():
                     verdict_msg.best_pick = self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))]
                     self.pubRecog.publish(verdict_msg)
 
-            # else:
-            #     if self.Flag:
-            #         print("------------------------------")
-            #         rospy.loginfo("publishing value: " + str(self.DInfo))
-            #         self.pubDec.publish(self.DInfo)
-            #
-            #         self.Flag = False
+
             rate.sleep()
 
 # ###################################OBJECT LAUNCH#################
@@ -143,10 +137,14 @@ class person_tracking():
 #     def face_kill_launch(self):
 #         self.face_launch.shutdown()
 
+######WE INITIALLY DO NOT NEED TRACKING THE FACE
+
 ###Gaze tracking
-    def coordinates(self, RealWorld):
-        if self.DInfo.decision == "Person Tracked":
-            self.gaze.publish(RealWorld.detections[ObjectReal].pose)
+    # def coordinates(self, RealWorld):
+    #     if self.DInfo.decision == "Person Tracked":
+    #         self.gaze.publish(RealWorld.detections[ObjectReal].pose)
+
+
     def controller_callback(self,msg):
         # Listens to the objection and people detection modules
         self.subDetec = rospy.Subscriber(
