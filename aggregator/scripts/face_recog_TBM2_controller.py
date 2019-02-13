@@ -92,6 +92,8 @@ class face_recognizer():
         # self.face_launch() ##UNCOMMENT TO TEST ON ROBOT
         self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(self.uuid)
+
+        #self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
 #Main loop to publish decisions
 
 
@@ -107,12 +109,14 @@ class face_recognizer():
                     rospy.loginfo("Launching face recognition")
                     self.face_launch()
                     self.On = True
+                    self.Flag = False #TODO Richard added this, could be bullsh*t
+                    #rospy.sleep(7.5)
 
                 self.Stop = (rospy.Time.now()-self.DetecTimeP) >   self.Scanning_Time
                 if self.Stop:
                     #Verdict when no faces were detected
                     if self.DInfo.decision == "No people":
-                        # print("No one was seen")
+                        print("No one was seen")
                         #PUBLISH VERDICT
                         verdict_msg = Face_recog_verdict()
                         verdict_msg.best_pick = "No people"
@@ -134,8 +138,10 @@ class face_recognizer():
                         verdict_msg = Face_recog_verdict()
                         verdict_msg.best_pick = self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))]
                         rospy.loginfo("Publishing detected faces")
+                        rospy.loginfo("Best pick: " + str(verdict_msg.best_pick))
                         self.pubRecog.publish(verdict_msg)
                         rospy.loginfo("Killing face cagbal...")
+                        self.DInfo.decision ="Done"
                         self.face_kill_launch()
                         self.On = False
                         self.Flag = False
@@ -152,17 +158,19 @@ class face_recognizer():
 #         self.obj_launch.start()
 # ###################################FACE LAUNCH#################
     def face_launch(self):
-        self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
-        # self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/ros_people_object_detection_tensorflow/launch/alltogether.launch"])
-
-        self.face_launch.start()
+        #TODO moved this to init, commented out, added = 0
+        #self.face_launchee = 0
+        # self.face_launcher = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
+        self.face_launcher = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/ros_people_object_detection_tensorflow/launch/alltogether.launch"])
+#
+        self.face_launcher.start()
 # ###################################TURNING OFF OBJECT LAUNCH#################
 #     def obj_kill_launch(self):
 #         self.obj_launch.shutdown()
 #
 # ###################################TURNING OFF FACE LAUNCH#################
     def face_kill_launch(self):
-        temp = self.face_launch.shutdown()
+        temp = self.face_launcher.shutdown()
         rospy.sleep(1)
 
 

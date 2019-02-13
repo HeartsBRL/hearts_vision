@@ -2,8 +2,8 @@
 <launch>
   <!-- Openni2 launch to use external Orbbec camera -->
   <include file="$(find openni2_launch)/launch/openni2.launch"/>
-  <!-- <remap from="/xtion/rgb/image_raw" to="/camera/rgb/image_raw"/> -->
-  <!-- <remap from="/xtion/depth/image" to="/camera/depth/image_rect"/> -->
+  <remap from="/xtion/rgb/image_raw" to="/camera/rgb/image_raw"/>
+  <remap from="/xtion/depth/image" to="/camera/depth/image_rect"/>
 
   <include file="$(find cob_people_object_detection_tensorflow)/launch/alltogether.launch"/>
   <!-- RVIZ visualisation node -->
