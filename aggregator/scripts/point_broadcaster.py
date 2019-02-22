@@ -6,7 +6,7 @@ import tf #ROS Transform library
 from cob_perception_msgs.msg import DetectionArray, Detection#, DetectionLife, Life #Cagbal messages
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String
-
+from hearts_follow_msgs.msg import ConPoint, Points
 
 class PS_broadcaster():
 
@@ -20,16 +20,17 @@ class PS_broadcaster():
             self.positionCallback) #Name // Type of message and Callback
 
         # Publishes the decision made by the aggregator
-        self.pubPos = rospy.Publisher(
-                "/aruco_single/pose",
-                PoseStamped,
-                queue_size=1)
+#        self.pubPos = rospy.Publisher(
+#                "/aruco_single/pose",
+#                PoseStamped,
+#                queue_size=1)
 
-        self.pubPos2 = rospy.Publisher(
-                "/look_at",
-                PoseStamped,
-                queue_size=1)
+#        self.pubPos2 = rospy.Publisher(
+#                "/look_at",
+#                PoseStamped,
+#                queue_size=1)
 
+        self.pubPoints = rospy.Publisher("hearts/follow_candidates", Points, queue_size=1)
 
         #Publish to get what we want to say
         self.pubsay = rospy.Publisher(
@@ -40,6 +41,7 @@ class PS_broadcaster():
         self.final_pos = PoseStamped()
         self.args = rospy.myargv(argv=sys.argv) # rospy adapatation of sys arguments
         self.flag = True
+        self.points = Points()
 
     def decision_making(self):
 
@@ -52,39 +54,30 @@ class PS_broadcaster():
     #Function to be run when some data arrives from the ROSBAG
 
     def positionCallback(self, data):
-        look = False
+        #look = False
+        self.points = Points()
+        self.points.header.frame_id = "xtion_rgb_optical_frame"
         if self.flag:
             if len(data.detections) > 0:
-                print "looking"
+                #print "looking"
                 for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
-                    if data.detections[ObjectReal].label == self.args[1]:
-                        self.pubsay.publish("I see a " + data.detections[ObjectReal].label)
-                        self.final_pos.header.frame_id = "xtion_optical_frame"#"camera_link"#"xtion_rgb_optical_frame"
+                    if data.detections[ObjectReal].label == "person":
+                        conPoint = ConPoint()
+                        #self.pubsay.publish("I see a " + data.detections[ObjectReal].label)
+                        #self.final_pos.header.frame_id = "xtion_optical_frame"#"camera_link"#"xtion_rgb_optical_frame"
                         #CHANGE HERE
-                        self.final_pos.pose.position.x = data.detections[ObjectReal].pose.pose.position.x
-                        self.final_pos.pose.position.y = data.detections[ObjectReal].pose.pose.position.y
-                        self.final_pos.pose.position.z = data.detections[ObjectReal].pose.pose.position.z
+                        conPoint.point.x = data.detections[ObjectReal].pose.pose.position.x
+                        conPoint.point.y = data.detections[ObjectReal].pose.pose.position.y
+                        conPoint.point.z = data.detections[ObjectReal].pose.pose.position.z
+                        self.points.points.append(conPoint)
                         #self.pubPos.publish(self.final_pos)
-                        self.pubPos2.publish(self.final_pos)
-                        self.flag=False
-                        look = False
-                        print("yeah")
-                        break
-        #add routine to make tiago continually look at detected object
-        elif look:
-            if len(data.detections) > 0:
-                for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
-                    if data.detections[ObjectReal].label == self.args[1]:
-                        self.final_pos.header.frame_id = "xtion_optical_frame"#"camera_link" #"xtion_rgb_optical_frame"
-                        #CHANGE HERE
-                        self.final_pos.pose.position.x = data.detections[ObjectReal].pose.pose.position.x
-                        self.final_pos.pose.position.y = data.detections[ObjectReal].pose.pose.position.y
-                        self.final_pos.pose.position.z = data.detections[ObjectReal].pose.pose.position.z
-                        self.pubPos2.publish(self.final_pos)
-                        break
+                        #self.pubPos2.publish(self.final_pos)
+                        #self.flag=False
+                        #look = False
+                        print(self.points.points)
 
-
-
+                if len(self.points.points) > 0:        #break
+                    self.pubPoints.publish(self.points)
 ################################MAIN SCRIPT#############################
 
 if __name__ == '__main__': #Main function that calls other functions

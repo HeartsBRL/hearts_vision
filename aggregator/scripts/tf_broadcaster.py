@@ -45,6 +45,6 @@ class tf_broadcaster():
 
 if __name__ == '__main__': #Main function that calls other functions
 
-    rospy.init_node('body_data_handling', anonymous=True) # Node initialisation ANONYMOUS=True to allow different nodes with the same name
+    rospy.init_node('tf_broadcaster', anonymous=False) # Node initialisation ANONYMOUS=True to allow different nodes with the same name
     n = tf_broadcaster() #Class instantiation
 rospy.spin() # spin() simply keeps python from exiting until this node is stopped

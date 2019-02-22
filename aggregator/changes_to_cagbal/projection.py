@@ -41,7 +41,7 @@ class ProjectionNode(object):
 
         self._bridge = CvBridge()
 
-        (depth_topic, face_topic, output_topic, f, cx, cy) = \
+        (depth_topic, face_topic, output_topic, RF, cx, cy) = \
             self.get_parameters()
 
          # Subscribe to the face positions
@@ -157,4 +157,5 @@ def main():
     node = ProjectionNode()
 
 if __name__ == '__main__':
-    main()
+    #main()
+    node = ProjectionNode()
