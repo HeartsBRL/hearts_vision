@@ -17,8 +17,8 @@ class vision_sense():
         self.obj_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/object_detector.launch"])
         self.face_launch = roslaunch.parent.ROSLaunchParent(self.uuid, ["/home/hearts/workspaces/hearts_erl/src/hearts_vision/aggregator/launch/face_detector.launch"])
 
-        self.obj_sub = rospy.Subscriber('hearts_vision/obj_toggle', Bool, self.obj_toggle)
-        self.face_sub = rospy.Subscriber('hearts_vision/face_toggle', Bool, self.face_toggle)
+        self.obj_sub = rospy.Subscriber('hearts/vision/obj_toggle', Bool, self.obj_toggle)
+        self.face_sub = rospy.Subscriber('hearts/vision/face_toggle', Bool, self.face_toggle)
 
 ####Toggle object detection
     def obj_toggle(self,data):

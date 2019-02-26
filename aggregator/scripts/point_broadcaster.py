@@ -3,6 +3,7 @@ import sys
 import roslib #Ros libraries
 import rospy #Python library
 import tf #ROS Transform library
+import time
 from cob_perception_msgs.msg import DetectionArray, Detection#, DetectionLife, Life #Cagbal messages
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String
@@ -42,6 +43,7 @@ class PS_broadcaster():
         self.args = rospy.myargv(argv=sys.argv) # rospy adapatation of sys arguments
         self.flag = True
         self.points = Points()
+        self.commtime = time.time()
 
     def decision_making(self):
 
@@ -57,7 +59,7 @@ class PS_broadcaster():
         #look = False
         self.points = Points()
         self.points.header.frame_id = "xtion_rgb_optical_frame"
-        if self.flag:
+        if self.flag and (time.time() - self.commtime > 1):
             if len(data.detections) > 0:
                 #print "looking"
                 for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
@@ -78,6 +80,8 @@ class PS_broadcaster():
 
                 if len(self.points.points) > 0:        #break
                     self.pubPoints.publish(self.points)
+                    self.commtime = time.time()
+
 ################################MAIN SCRIPT#############################
 
 if __name__ == '__main__': #Main function that calls other functions

@@ -16,8 +16,7 @@ import time
 import tf #ROS Transform library
 import sys
 import roslaunch
-from std_msgs.msg import String
-from std_msgs.msg import Int32
+from std_msgs.msg import String, Int32, Bool
 from aggregator.msg import DetectedInfo, Face_recog_verdict# My personal messages
 from cob_perception_msgs.msg import DetectionArray, Detection#Cagbal messages
 from geometry_msgs.msg import PoseStamped
@@ -40,6 +39,10 @@ class face_recognizer():
                 Face_recog_verdict,
                 queue_size=1)
 
+        self.vision_toggle = rospy.Publisher(
+                "cob_detector_toggle",
+                Bool,
+                queue_size=1)
 
 
         # #       DELETE AFTER TESTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -107,9 +110,12 @@ class face_recognizer():
             if self.Flag:
                 if not self.On:
                     rospy.loginfo("Launching face recognition")
-                    self.face_launch()
+                    #self.face_launch()
+                    msg = Bool()
+                    msg.data = True
+                    self.vision_toggle.publish(msg)
                     self.On = True
-                    self.Flag = False #TODO Richard added this, could be bullsh*t
+                    self.Flag = False
                     #rospy.sleep(7.5)
 
                 self.Stop = (rospy.Time.now()-self.DetecTimeP) >   self.Scanning_Time
@@ -117,19 +123,25 @@ class face_recognizer():
                     #Verdict when no faces were detected
                     if self.DInfo.decision == "No people":
                         print("No one was seen")
+
                         #PUBLISH VERDICT
                         verdict_msg = Face_recog_verdict()
                         verdict_msg.best_pick = "No people"
                         rospy.loginfo("Publishing that no faces were detected")
                         self.pubRecog.publish(verdict_msg)
                         self.DInfo.decision ="Done"
-                        self.face_kill_launch()
+                        #self.face_kill_launch()
+                        msg = Bool()
+                        msg.data = False
+                        self.vision_toggle.publish(msg)
                         self.On = False
                         self.Flag = False
                         self.face_recog_sub.unregister()
                     #Verdict if it was still detecting faces
                     elif self.DInfo.decision == "Calculating":
                         print(self.Total_detections)
+                        if self.Total_detections == 0: #added this to stop 'division by zero' error
+                            self.Total_detections = 1
                         self.PeopleConfidencePercent = [x*100 / self.Total_detections for x in self.PeopleConfidence]
                         print(self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))])
                         print(self.PeopleConfidencePercent)
@@ -142,7 +154,9 @@ class face_recognizer():
                         self.pubRecog.publish(verdict_msg)
                         rospy.loginfo("Killing face cagbal...")
                         self.DInfo.decision ="Done"
-                        self.face_kill_launch()
+                        msg = Bool()
+                        msg.data = False
+                        self.vision_toggle.publish(msg)
                         self.On = False
                         self.Flag = False
                         self.face_recog_sub.unregister()
@@ -187,10 +201,9 @@ class face_recognizer():
         # Listens to the objection and people detection modules
         self.Scanning_Time = msg.scan_time
         rospy.loginfo("Message received from main controller")
-        self.face_recog_sub = self.subDetec = rospy.Subscriber(
-                "/face_recognizer/faces",
-                DetectionArray,
-                self.callback)
+        self.face_recog_sub = rospy.Subscriber("/face_recognizer/faces",
+                                               DetectionArray,
+                                               self.callback)
         rospy.loginfo("Listening to Cagbal")
         self.Flag = True #To start the count down for detection
 
@@ -230,7 +243,7 @@ class face_recognizer():
 
 
 if __name__ == '__main__':
-    rospy.init_node("face_recognizer", anonymous=True)
+    rospy.init_node("face_recognizer", anonymous=False)
     rospy.loginfo("face recog node initiated")
     n = face_recognizer()
     n.decision_making()
