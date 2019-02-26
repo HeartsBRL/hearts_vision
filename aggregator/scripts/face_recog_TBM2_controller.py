@@ -199,6 +199,16 @@ class face_recognizer():
 
     def controller_callback(self, msg):
         # Listens to the objection and people detection modules
+        self.DInfo = DetectedInfo() # Message to publish decision
+        self.DInfo.score = 0
+        self.DInfo.label = "Nothing"
+        self.DInfo.id = "Unknown"
+        self.DInfo.decision = "None"
+
+        #List of detected humans
+        self.PeopleConfidence = [0,0,0]
+        self.Total_detections = 0
+
         self.Scanning_Time = msg.scan_time
         rospy.loginfo("Message received from main controller")
         self.face_recog_sub = rospy.Subscriber("/face_recognizer/faces",
