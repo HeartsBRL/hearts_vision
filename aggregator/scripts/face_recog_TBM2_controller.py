@@ -140,8 +140,8 @@ class face_recognizer():
                     #Verdict if it was still detecting faces
                     elif self.DInfo.decision == "Calculating":
                         print(self.Total_detections)
-                        if self.Total_detections == 0: #added this to stop 'division by zero' error
-                            self.Total_detections = 1
+                        #if self.Total_detections == 0: #added this to stop 'division by zero' error
+                        #    self.Total_detections = 1
                         self.PeopleConfidencePercent = [x*100 / self.Total_detections for x in self.PeopleConfidence]
                         print(self.KnownPeople[self.PeopleConfidencePercent.index(max(self.PeopleConfidencePercent))])
                         print(self.PeopleConfidencePercent)
@@ -227,6 +227,7 @@ class face_recognizer():
         if not self.Stop:
             if len(data.detections) > 0:
 
+                #TODO handle data.detections == something not in known people (e.g. "richard")
                 for ObjectReal in range(len(data.detections)): #For each bodypart send/create a tf transform
                     for People in range(len(self.KnownPeople)):
                         if data.detections[ObjectReal].label == self.KnownPeople[People]: #First filter BASED ON SCORE
